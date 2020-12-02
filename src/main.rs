@@ -7,16 +7,20 @@ mod systems;
 use bevy::prelude::*;
 
 use components::character::*;
+use components::rigidbody::*;
 use game::*;
 use resources::world::*;
 use systems::character::*;
+use systems::physics::*;
 
 const WINDOW_WIDTH: u32 = 1280;
 const WINDOW_HEIGHT: u32 = 720;
 
+// https://github.com/jamadazi/bevy-cookbook/blob/master/bevy-cookbook.md#custom-camera-projection
+
 fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     commands
-        // camerasorthographic_projection
+        // cameras
         .spawn(Camera2dComponents::default())
         .spawn(UiCameraComponents::default())
         // characters
@@ -25,7 +29,8 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
             sprite: Sprite::new(Vec2::new(50.0, 50.0)),
             ..Default::default()
         })
-        .with(Character { speed: 500.0 });
+        .with(Character { speed: 500.0 })
+        .with(RigidBody2D::default());
 }
 
 fn main() {
@@ -48,8 +53,10 @@ fn main() {
             min: Vec2::new(-half_window_width, -half_window_height),
             max: Vec2::new(half_window_width, half_window_height),
         })
+        .add_resource(WorldConfig::default())
         .add_startup_system(setup.system())
-        .add_startup_system(debug::debug_world_bounds.system())
         .add_system(character_input_2d_keyboard_system.system())
+        .add_system(process_rigidbodies_2d.system())
+        .add_system(debug::debug_system.system())
         .run();
 }

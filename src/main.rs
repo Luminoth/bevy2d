@@ -11,9 +11,12 @@ use game::*;
 use resources::world::*;
 use systems::character::*;
 
+const WINDOW_WIDTH: u32 = 1280;
+const WINDOW_HEIGHT: u32 = 720;
+
 fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     commands
-        // cameras
+        // camerasorthographic_projection
         .spawn(Camera2dComponents::default())
         .spawn(UiCameraComponents::default())
         // characters
@@ -26,11 +29,14 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
 }
 
 fn main() {
+    let half_window_width = WINDOW_WIDTH as f32 / 2.0;
+    let half_window_height = WINDOW_HEIGHT as f32 / 2.0;
+
     App::build()
         .add_resource(WindowDescriptor {
             title: "Bevy 2D".to_owned(),
-            width: 1280,
-            height: 720,
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
             vsync: true,
             resizable: false,
             ..Default::default()
@@ -39,8 +45,8 @@ fn main() {
         .add_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_resource(GameState::default())
         .add_resource(WorldBounds2D {
-            min: Vec2::new(-500.0, -250.0),
-            max: Vec2::new(500.0, 250.0),
+            min: Vec2::new(-half_window_width, -half_window_height),
+            max: Vec2::new(half_window_width, half_window_height),
         })
         .add_startup_system(setup.system())
         .add_startup_system(debug::debug_world_bounds.system())

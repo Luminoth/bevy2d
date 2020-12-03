@@ -1,11 +1,15 @@
+//! Character systems
+
 use bevy::prelude::*;
 
 use crate::components::character::*;
 use crate::resources::world::*;
 
+/// Handles keyboard input for all characters
+// TODO: this should only apply to *player* characters
 pub fn character_input_2d_keyboard_system(
     time: Res<Time>,
-    bounds: Res<WorldBounds2D>,
+    world_bounds: Res<WorldBounds2D>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&Character, &Sprite, &mut Transform)>,
 ) {
@@ -22,8 +26,8 @@ pub fn character_input_2d_keyboard_system(
         let half_width = sprite.size.x() / 2.0;
 
         let x = (transform.translation.x() + time.delta_seconds * direction.x() * character.speed)
-            .min(bounds.max.x() - half_width)
-            .max(bounds.min.x() + half_width);
+            .min(world_bounds.max.x() - half_width)
+            .max(world_bounds.min.x() + half_width);
         transform.translation.set_x(x);
     }
 }

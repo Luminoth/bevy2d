@@ -5,36 +5,62 @@
 //! updated to use an "orthographic size" like Unity's orthographic camera
 
 use bevy::prelude::*;
-use bevy::render::camera::{Camera, CameraProjection, DepthCalculation, VisibleEntities};
+use bevy::render::camera::{
+    Camera, CameraProjection, DepthCalculation, VisibleEntities, WindowOrigin,
+};
 use derivative::Derivative;
 
 #[derive(Derivative, Debug)]
 #[derivative(Default)]
 pub struct OrthoProjection {
-    #[derivative(Default(value = "1.0"))]
-    size: f32,
+    left: f32,
+    right: f32,
+    bottom: f32,
+    top: f32,
+
+    near: f32,
 
     #[derivative(Default(value = "1000.0"))]
     far: f32,
 
+    // half-height
     #[derivative(Default(value = "1.0"))]
-    aspect: f32,
+    size: f32,
+
+    #[derivative(Default(value = "WindowOrigin::Center"))]
+    pub window_origin: WindowOrigin,
 }
 
 impl CameraProjection for OrthoProjection {
     fn get_projection_matrix(&self) -> Mat4 {
         Mat4::orthographic_rh(
-            -self.aspect * self.size,
-            self.aspect * self.size,
-            -self.size,
-            self.size,
-            0.0,
+            self.left,
+            self.right,
+            self.bottom,
+            self.top,
+            self.near,
             self.far,
         )
     }
 
     fn update(&mut self, width: usize, height: usize) {
-        self.aspect = width as f32 / height as f32;
+        let aspect = width as f32 / height as f32;
+        println!("aspect ratio {}", aspect);
+
+        match self.window_origin {
+            WindowOrigin::Center => {
+                self.left = -aspect * self.size;
+                self.right = aspect * self.size;
+                self.bottom = -self.size;
+                self.top = self.size;
+            }
+            WindowOrigin::BottomLeft => {
+                self.left = 0.0;
+                self.right = aspect * self.size * 2.0;
+                self.bottom = 0.0;
+                self.top = self.size * 2.0;
+            }
+        }
     }
 
     fn depth_calculation(&self) -> DepthCalculation {

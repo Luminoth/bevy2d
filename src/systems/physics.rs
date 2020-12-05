@@ -24,3 +24,6 @@ pub fn process_rigidbodies_2d(
         rigidbody.apply(&mut transform, time.delta_seconds);
     }
 }
+
+/// Process physics collisions
+pub fn process_collisions() {}

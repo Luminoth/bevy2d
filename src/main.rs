@@ -8,6 +8,7 @@ use bevy::prelude::*;
 
 use components::camera::*;
 use components::character::*;
+use components::collider::*;
 use components::rigidbody::*;
 use resources::game::*;
 use resources::world::*;
@@ -17,20 +18,20 @@ use systems::physics::*;
 
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
-const SPRITE_SIZE: f32 = 32.0;
+const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
 
-fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
-    // https://indiehoodgames.wordpress.com/2013/07/27/pixel-perfect-calculator-for-orthographic-camera-unity3d/
-    let camera_size = WINDOW_HEIGHT / (2.0 * SPRITE_SIZE);
-    println!("camera size: {}", camera_size);
+// https://indiehoodgames.wordpress.com/2013/07/27/pixel-perfect-calculator-for-orthographic-camera-unity3d/
+const PIXELS_PER_UNIT: f32 = 32.0;
+const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
+
+fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
+    println!("camera size: {}", CAMERA_SIZE);
 
     commands
-        // cameras
-        .spawn(Ortho2dComponents::new(camera_size))
-        .spawn(UiCameraComponents::default())
+        .spawn(Ortho2dComponents::new(CAMERA_SIZE))
         // characters
         .spawn(SpriteComponents {
-            material: materials.add(Color::rgb(1.0, 0.0, 1.0).into()),
+            material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
             sprite: Sprite::new(Vec2::new(1.0, 2.0)),
             ..Default::default()
         })
@@ -39,12 +40,38 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
             kinematic: true,
             ..Default::default()
         });
+
+    // world
+    // TODO: spawning just a single floor that spans the entire width would be better
+    for x in 0..41 {
+        commands
+            .spawn(SpriteComponents {
+                material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
+                sprite: Sprite::new(Vec2::new(1.0, 1.0)),
+                // TODO: this is a bunch of magic based on ASPECT_RATIO and CAMERA_SIZE
+                transform: Transform::from_translation(Vec3::new(
+                    (-ASPECT_RATIO * CAMERA_SIZE) + x as f32,
+                    -CAMERA_SIZE + 0.5,
+                    0.0,
+                )),
+                ..Default::default()
+            })
+            .with(Collider {
+                bounds: Rect {
+                    left: 0.0,
+                    right: 1.0,
+                    bottom: 0.0,
+                    top: 0.0,
+                },
+            });
+    }
+}
+
+fn setup_ui(mut commands: Commands) {
+    commands.spawn(UiCameraComponents::default());
 }
 
 fn main() {
-    //let half_window_width = WINDOW_WIDTH / 2.0;
-    //let half_window_height = WINDOW_HEIGHT / 2.0;
-
     App::build()
         .add_resource(WindowDescriptor {
             title: "Bevy 2D".to_owned(),
@@ -57,14 +84,15 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_resource(GameState::default())
-        // TODO: this is using some magic knowledge about the size of the viewport
-        // (and it's incorrect... so... yeah)
+        // TODO: we need a component to update this
+        // whenever the window size changes
         .add_resource(WorldBounds2D {
-            min: Vec2::new(-17.0, -10.0),
-            max: Vec2::new(17.0, 10.0),
+            min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
+            max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
         })
         .add_resource(WorldConfig::default())
-        .add_startup_system(setup.system())
+        .add_startup_system(setup_world.system())
+        .add_startup_system(setup_ui.system())
         // add internal camera system update
         .add_system_to_stage(
             bevy::app::stage::POST_UPDATE,
@@ -72,6 +100,7 @@ fn main() {
         )
         .add_system(character_input_2d_keyboard_system.system())
         .add_system(process_rigidbodies_2d.system())
+        .add_system(process_collisions.system())
         .add_system(debug_system.system())
         .run();
 }

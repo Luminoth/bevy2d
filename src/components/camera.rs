@@ -10,6 +10,7 @@ use bevy::render::camera::{
 };
 use derivative::Derivative;
 
+/// Orthographic camera projection
 #[derive(Derivative, Debug)]
 #[derivative(Default)]
 pub struct OrthoProjection {
@@ -68,6 +69,7 @@ impl CameraProjection for OrthoProjection {
     }
 }
 
+/// Orthographic camera component bundle
 #[derive(Bundle)]
 pub struct Ortho2dComponents {
     pub camera: Camera,

@@ -4,6 +4,7 @@ mod components;
 mod resources;
 mod systems;
 
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 
 use components::camera::*;
@@ -23,6 +24,11 @@ const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
 // https://indiehoodgames.wordpress.com/2013/07/27/pixel-perfect-calculator-for-orthographic-camera-unity3d/
 const PIXELS_PER_UNIT: f32 = 32.0;
 const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
+
+fn setup(asset_server: Res<AssetServer>) {
+    #[cfg(debug_assertions)]
+    asset_server.watch_for_changes().unwrap();
+}
 
 fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     println!("camera size: {}", CAMERA_SIZE);
@@ -48,7 +54,8 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
             .spawn(SpriteComponents {
                 material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
                 sprite: Sprite::new(Vec2::new(1.0, 1.0)),
-                // TODO: this is a bunch of magic based on ASPECT_RATIO and CAMERA_SIZE
+                // TODO: we need a component to update this
+                // whenever the window size changes
                 transform: Transform::from_translation(Vec3::new(
                     (-ASPECT_RATIO * CAMERA_SIZE) + x as f32,
                     -CAMERA_SIZE + 0.5,
@@ -77,11 +84,12 @@ fn main() {
             title: "Bevy 2D".to_owned(),
             width: WINDOW_WIDTH as u32,
             height: WINDOW_HEIGHT as u32,
-            vsync: true,
+            vsync: false,
             resizable: false,
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .add_resource(GameState::default())
         // TODO: we need a component to update this
@@ -91,6 +99,7 @@ fn main() {
             max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
         })
         .add_resource(WorldConfig::default())
+        .add_startup_system(setup.system())
         .add_startup_system(setup_world.system())
         .add_startup_system(setup_ui.system())
         // add internal camera system update
@@ -102,5 +111,6 @@ fn main() {
         .add_system(process_rigidbodies_2d.system())
         .add_system(process_collisions.system())
         .add_system(debug_system.system())
+        .add_system(fps_text_system.system())
         .run();
 }

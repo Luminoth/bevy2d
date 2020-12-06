@@ -108,8 +108,9 @@ fn main() {
             bevy::render::camera::camera_system::<OrthoProjection>.system(),
         )
         .add_system(character_input_2d_keyboard_system.system())
-        .add_system(process_rigidbodies_2d.system())
-        .add_system(process_collisions.system())
+        .add_system(check_grounded_system.system())
+        .add_system(process_rigidbodies_2d_system.system())
+        .add_system(process_collisions_system.system())
         .add_system(debug_system.system())
         .add_system(fps_text_system.system())
         .run();

@@ -6,7 +6,7 @@ use crate::components::rigidbody::*;
 use crate::resources::world::*;
 
 /// Process physics for all RigidBody2D components
-pub fn process_rigidbodies_2d(
+pub fn process_rigidbodies_2d_system(
     time: Res<Time>,
     world_config: Res<WorldConfig>,
     mut query: Query<(&mut RigidBody2D, &mut Transform)>,
@@ -26,4 +26,4 @@ pub fn process_rigidbodies_2d(
 }
 
 /// Process physics collisions
-pub fn process_collisions() {}
+pub fn process_collisions_system() {}

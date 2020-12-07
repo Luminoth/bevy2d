@@ -4,56 +4,56 @@ use bevy::diagnostic::*;
 use bevy::prelude::*;
 
 use crate::components::debug::*;
-use crate::resources::game::*;
-use crate::resources::world::*;
+use crate::events::debug::*;
+use crate::resources::debug::*;
 
-fn toggle_debug(
+/// Toggles debug on input
+///
+/// Sends the ToggleDebugEvent
+pub fn debug_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    world_bounds: Res<WorldBounds2D>,
-    mut game_state: ResMut<GameState>,
-) {
-    println!("Toggling debug ...");
-
-    // TODO: what if instead of this
-    // we injected and removed debug resources?
-    // is that even possible?
-    if let Some(mut debug) = game_state.debug.take() {
-        debug.cleanup(&mut commands);
-    } else {
-        game_state.debug = Some(DebugState::new(
-            &mut commands,
-            &asset_server,
-            &mut meshes,
-            &mut materials,
-            &world_bounds,
-        ));
-    }
-}
-
-pub fn debug_system(
-    commands: Commands,
-    asset_server: Res<AssetServer>,
-    meshes: ResMut<Assets<Mesh>>,
-    materials: ResMut<Assets<ColorMaterial>>,
-    world_bounds: Res<WorldBounds2D>,
-    game_state: ResMut<GameState>,
+    mut debug_state: ResMut<DebugState>,
     keyboard_input: Res<Input<KeyCode>>,
+    mut debug_events: ResMut<Events<ToggleDebugEvent>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::D) {
-        toggle_debug(
-            commands,
-            asset_server,
-            meshes,
-            materials,
-            world_bounds,
-            game_state,
-        );
+        println!("Toggling debug ...");
+
+        debug_state.enabled = !debug_state.enabled;
+
+        if debug_state.enabled {
+            commands
+                .spawn(TextComponents {
+                    style: Style {
+                        align_self: AlignSelf::FlexEnd,
+                        position_type: PositionType::Absolute,
+                        ..Default::default()
+                    },
+                    text: Text {
+                        value: "debug".to_owned(),
+                        font: asset_server.load("fonts/Roboto-Regular.ttf"),
+                        style: TextStyle {
+                            font_size: 30.0,
+                            color: Color::WHITE,
+                        },
+                    },
+                    ..Default::default()
+                })
+                .with(FPSText);
+
+            debug_state.fps_text_entity = commands.current_entity();
+        } else {
+            if let Some(fps_text) = debug_state.fps_text_entity.take() {
+                commands.despawn(fps_text);
+            }
+        }
+
+        debug_events.send(ToggleDebugEvent);
     }
 }
 
+/// Handles FPS text
 pub fn fps_text_system(
     time: Res<Time>,
     diagnostics: Res<Diagnostics>,

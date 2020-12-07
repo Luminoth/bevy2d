@@ -31,5 +31,3 @@ pub fn character_input_2d_keyboard_system(
         transform.translation.set_x(x);
     }
 }
-
-pub fn check_grounded_system() {}

@@ -7,19 +7,18 @@ mod systems;
 
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
+use bevy_rapier2d::physics::RapierPhysicsPlugin;
+use bevy_rapier2d::rapier::dynamics::RigidBodyBuilder;
+use bevy_rapier2d::rapier::geometry::ColliderBuilder;
 
 use components::camera::*;
 use components::character::*;
-use components::collider::*;
-use components::rigidbody::*;
 use events::debug::*;
 use resources::debug::*;
 use resources::game::*;
 use resources::world::*;
 use systems::character::*;
-use systems::collider::*;
 use systems::debug::*;
-use systems::physics::*;
 use systems::world::*;
 
 const WINDOW_WIDTH: f32 = 1280.0;
@@ -47,7 +46,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     // world
     commands
-        .insert_resource(WorldConfig::default())
         // TODO: we need a component to update this whenever the window size changes
         .insert_resource(WorldBounds2D {
             min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
@@ -60,23 +58,13 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
             .spawn(SpriteComponents {
                 material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
                 sprite: Sprite::new(Vec2::new(1.0, 1.0)),
-                // TODO: we need a component to update this
-                // whenever the window size changes
-                transform: Transform::from_translation(Vec3::new(
-                    (-ASPECT_RATIO * CAMERA_SIZE) + x as f32,
-                    -CAMERA_SIZE + 0.5,
-                    0.0,
-                )),
                 ..Default::default()
             })
-            .with(Collider {
-                bounds: Rect {
-                    left: 0.0,
-                    right: 1.0,
-                    bottom: 0.0,
-                    top: 1.0,
-                },
-            });
+            .with(
+                RigidBodyBuilder::new_static()
+                    .translation((-ASPECT_RATIO * CAMERA_SIZE) + x as f32, -CAMERA_SIZE + 0.5),
+            )
+            .with(ColliderBuilder::cuboid(0.5, 0.5));
     }
 
     // characters
@@ -87,10 +75,8 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
             ..Default::default()
         })
         .with(Character { speed: 10.0 })
-        .with(RigidBody2D {
-            kinematic: true,
-            ..Default::default()
-        });
+        .with(RigidBodyBuilder::new_kinematic())
+        .with(ColliderBuilder::cuboid(0.5, 1.0));
 }
 
 fn setup_ui(mut commands: Commands) {
@@ -112,6 +98,8 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(RapierPhysicsPlugin)
+        //.add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_event::<ToggleDebugEvent>()
         .add_startup_system(setup.system())
@@ -125,12 +113,9 @@ fn main() {
         )
         // input
         .add_system(character_input_2d_keyboard_system.system())
-        // physics
-        .add_system(process_rigidbodies_2d_system.system())
         // debug
         .add_system(debug_system.system())
         .add_system(world_bounds_toggle_debug_system.system())
-        .add_system(collider_toggle_debug_system.system())
         .add_system(fps_text_system.system())
         .run();
 }

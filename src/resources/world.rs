@@ -1,7 +1,6 @@
 //! Game... world... ? resources
 
 use bevy::prelude::*;
-use derivative::Derivative;
 
 /// World bounding box
 pub struct WorldBounds2D {
@@ -22,12 +21,4 @@ impl WorldBounds2D {
     pub fn height(&self) -> f32 {
         self.max.y() - self.min.y()
     }
-}
-
-/// Holds world "system" configuration things
-#[derive(Derivative)]
-#[derivative(Default)]
-pub struct WorldConfig {
-    #[derivative(Default(value = "9.81"))]
-    pub gravity: f32,
 }

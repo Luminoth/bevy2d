@@ -7,6 +7,7 @@ use crate::resources::world::*;
 
 /// Handles keyboard input for all characters
 // TODO: this should only apply to *player* characters
+// TODO: this broke when rapier was added... I don't think the transform can be used with a rigidbody
 pub fn character_input_2d_keyboard_system(
     time: Res<Time>,
     world_bounds: Res<WorldBounds2D>,

@@ -292,6 +292,7 @@ dependencies = [
  "bevy_prototype_lyon",
  "bevy_rapier2d",
  "derivative",
+ "once_cell",
 ]
 
 [[package]]

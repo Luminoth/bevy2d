@@ -11,3 +11,4 @@ bevy = "0.3"
 bevy_prototype_lyon = "0.1"
 bevy_rapier2d = { version = "0.6", features = [ "simd-stable", "parallel", "serde-serialize" ] }
 derivative = "2.1"
+once_cell = "1.5"

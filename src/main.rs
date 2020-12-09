@@ -7,9 +7,11 @@ mod systems;
 
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
-use bevy_rapier2d::physics::RapierPhysicsPlugin;
+use bevy_rapier2d::physics::{RapierConfiguration, RapierPhysicsPlugin};
 use bevy_rapier2d::rapier::dynamics::RigidBodyBuilder;
-use bevy_rapier2d::rapier::geometry::ColliderBuilder;
+use bevy_rapier2d::rapier::geometry::{ColliderBuilder, InteractionGroups};
+use bevy_rapier2d::rapier::math::Vector;
+use once_cell::sync::Lazy;
 
 use components::camera::*;
 use components::character::*;
@@ -20,6 +22,16 @@ use resources::world::*;
 use systems::character::*;
 use systems::debug::*;
 use systems::world::*;
+
+const WORLD_LAYER: u16 = 0b01;
+const CHARACTER_LAYER: u16 = 0b10;
+
+static WORLD_COLLISION_GROUPS: Lazy<InteractionGroups> =
+    Lazy::new(|| InteractionGroups::new(WORLD_LAYER, CHARACTER_LAYER));
+static CHARACTER_COLLISION_GROUPS: Lazy<InteractionGroups> =
+    Lazy::new(|| InteractionGroups::new(CHARACTER_LAYER, WORLD_LAYER));
+
+const GRAVITY: f32 = -9.81;
 
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
@@ -39,6 +51,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         // cameras
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .spawn(Ortho2dComponents::new(CAMERA_SIZE))
+        // physics
+        .insert_resource(RapierConfiguration {
+            gravity: Vector::y() * GRAVITY,
+            ..Default::default()
+        })
         // game state
         .insert_resource(GameState::default());
 }
@@ -64,7 +81,7 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
                 RigidBodyBuilder::new_static()
                     .translation((-ASPECT_RATIO * CAMERA_SIZE) + x as f32, -CAMERA_SIZE + 0.5),
             )
-            .with(ColliderBuilder::cuboid(0.5, 0.5));
+            .with(ColliderBuilder::cuboid(0.5, 0.5).collision_groups(*WORLD_COLLISION_GROUPS));
     }
 
     // characters
@@ -74,9 +91,17 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
             sprite: Sprite::new(Vec2::new(1.0, 2.0)),
             ..Default::default()
         })
-        .with(Character { speed: 10.0 })
-        .with(RigidBodyBuilder::new_kinematic())
-        .with(ColliderBuilder::cuboid(0.5, 1.0));
+        .with(Character {
+            speed: 10.0,
+            ..Default::default()
+        })
+        .with(
+            RigidBodyBuilder::new_dynamic()
+                .translation(0.0, 0.0)
+                .mass(70.0, false)
+                .lock_rotations(),
+        )
+        .with(ColliderBuilder::cuboid(0.5, 1.0).collision_groups(*CHARACTER_COLLISION_GROUPS));
 }
 
 fn setup_ui(mut commands: Commands) {
@@ -113,6 +138,8 @@ fn main() {
         )
         // input
         .add_system(character_input_2d_keyboard_system.system())
+        // physics
+        .add_system(character_grounded_systems.system())
         // debug
         .add_system(debug_system.system())
         .add_system(world_bounds_toggle_debug_system.system())

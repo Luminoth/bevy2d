@@ -67,11 +67,8 @@ pub fn character_grounded_systems(
             );
 
             let grounded = character.grounded;
-            if
-            //let Some((_handle, _collider, intersection)) =
-            qp
-                .cast_ray(&colliders, &ray, 0.1, *CHARACTER_COLLISION_GROUPS)
-                .is_some()
+            if let Some((_handle, _collider, intersection)) =
+                qp.cast_ray(&colliders, &ray, 0.1, *CHARACTER_COLLISION_GROUPS)
             {
                 //println!("collision at: {:?}", intersection.toi);
                 character.grounded = true;
@@ -79,6 +76,17 @@ pub fn character_grounded_systems(
                     println!("setting kinematic");
                     rigidbody.body_status = BodyStatus::Kinematic;
                 }
+
+                // adjust position so we don't fall through the collision
+                let point = ray.point_at(intersection.toi);
+                println!("point: {}", point);
+
+                let mut position = rigidbody.position().clone();
+                println!("before: {}", position);
+                position.translation.y = point.coords.y + half_height;
+                println!("after: {}", position);
+
+                rigidbody.set_position(position, false);
             } else {
                 //println!("not grounded");
                 character.grounded = false;

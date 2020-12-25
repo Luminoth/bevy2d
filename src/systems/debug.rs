@@ -11,7 +11,7 @@ use crate::resources::debug::*;
 ///
 /// Sends the ToggleDebugEvent
 pub fn debug_system(
-    mut commands: Commands,
+    commands: &mut Commands,
     asset_server: Res<AssetServer>,
     mut debug_state: ResMut<DebugState>,
     keyboard_input: Res<Input<KeyCode>>,
@@ -24,7 +24,7 @@ pub fn debug_system(
 
         if debug_state.enabled {
             commands
-                .spawn(TextComponents {
+                .spawn(TextBundle {
                     style: Style {
                         align_self: AlignSelf::FlexEnd,
                         position_type: PositionType::Absolute,
@@ -36,6 +36,7 @@ pub fn debug_system(
                         style: TextStyle {
                             font_size: 30.0,
                             color: Color::WHITE,
+                            ..Default::default()
                         },
                     },
                     ..Default::default()
@@ -68,7 +69,7 @@ pub fn fps_text_system(
             }
         }
 
-        let mut frame_time = time.delta_seconds_f64;
+        let mut frame_time = time.delta_seconds_f64();
         if let Some(frame_time_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FRAME_TIME)
         {
             if let Some(frame_time_avg) = frame_time_diagnostic.average() {

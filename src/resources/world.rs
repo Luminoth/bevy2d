@@ -14,11 +14,11 @@ pub struct WorldBounds2D {
 impl WorldBounds2D {
     /// Returns the width of the world
     pub fn width(&self) -> f32 {
-        self.max.x() - self.min.x()
+        self.max.x - self.min.x
     }
 
     /// Returns the height of the world
     pub fn height(&self) -> f32 {
-        self.max.y() - self.min.y()
+        self.max.y - self.min.y
     }
 }

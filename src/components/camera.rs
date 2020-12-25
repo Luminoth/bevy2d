@@ -44,8 +44,8 @@ impl CameraProjection for OrthoProjection {
         )
     }
 
-    fn update(&mut self, width: usize, height: usize) {
-        let aspect = width as f32 / height as f32;
+    fn update(&mut self, width: f32, height: f32) {
+        let aspect = width / height;
         println!("aspect ratio {}", aspect);
 
         match self.window_origin {
@@ -88,7 +88,7 @@ impl Ortho2dComponents {
             camera: Camera {
                 // have to use one of the internal magic constants
                 // since bevy relies on them internally for rendering
-                name: Some(bevy::render::render_graph::base::camera::CAMERA2D.to_owned()),
+                name: Some(bevy::render::render_graph::base::camera::CAMERA_2D.to_owned()),
                 ..Default::default()
             },
             orthographic_projection: OrthoProjection {

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::*;
+//use bevy_prototype_lyon::prelude::*;
 
 use crate::events::debug::*;
 use crate::resources::debug::*;
@@ -7,7 +7,7 @@ use crate::resources::world::*;
 
 /// Toggls world bounds debugging on event
 pub fn world_bounds_toggle_debug_system(
-    mut commands: Commands,
+    commands: &mut Commands,
     mut event_reader: Local<EventReader<ToggleDebugEvent>>,
     events: Res<Events<ToggleDebugEvent>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -22,7 +22,7 @@ pub fn world_bounds_toggle_debug_system(
         println!("Toggle world bounds debugging: {}", debug_state.enabled);
 
         for (entity, world_bounds) in query.iter() {
-            if debug_state.enabled {
+            /*if debug_state.enabled {
                 commands.insert_one(
                     entity,
                     primitive(
@@ -38,7 +38,7 @@ pub fn world_bounds_toggle_debug_system(
                 );
             } else {
                 commands.remove_one::<SpriteComponents>(entity);
-            }
+            }*/
         }
     }
 }

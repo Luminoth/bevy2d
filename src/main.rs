@@ -41,7 +41,7 @@ const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
 const PIXELS_PER_UNIT: f32 = 32.0;
 const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
     println!("camera size: {}", CAMERA_SIZE);
 
     #[cfg(debug_assertions)]
@@ -60,7 +60,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert_resource(GameState::default());
 }
 
-fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     // world
     commands
         // TODO: we need a component to update this whenever the window size changes
@@ -72,7 +72,7 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
     // TODO: spawning just a single floor that spans the entire width would be better
     for x in 0..41 {
         commands
-            .spawn(SpriteComponents {
+            .spawn(SpriteBundle {
                 material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
                 sprite: Sprite::new(Vec2::new(1.0, 1.0)),
                 ..Default::default()
@@ -86,7 +86,7 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
 
     // characters
     commands
-        .spawn(SpriteComponents {
+        .spawn(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
             sprite: Sprite::new(Vec2::new(1.0, 2.0)),
             ..Default::default()
@@ -104,11 +104,11 @@ fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMateria
         .with(ColliderBuilder::cuboid(0.5, 1.0).collision_groups(*CHARACTER_COLLISION_GROUPS));
 }
 
-fn setup_ui(mut commands: Commands) {
-    commands.spawn(UiCameraComponents::default());
+fn setup_ui(commands: &mut Commands) {
+    commands.spawn(CameraUiBundle::default());
 }
 
-fn setup_debug(mut commands: Commands) {
+fn setup_debug(commands: &mut Commands) {
     commands.insert_resource(DebugState::default());
 }
 
@@ -116,8 +116,8 @@ fn main() {
     App::build()
         .add_resource(WindowDescriptor {
             title: "Bevy 2D".to_owned(),
-            width: WINDOW_WIDTH as u32,
-            height: WINDOW_HEIGHT as u32,
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
             vsync: false,
             resizable: false,
             ..Default::default()

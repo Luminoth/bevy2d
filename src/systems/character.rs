@@ -22,11 +22,11 @@ pub fn character_input_2d_keyboard_system(
 ) {
     let mut direction = Vec2::default();
     if keyboard_input.pressed(KeyCode::Right) {
-        *direction.x_mut() += 1.0;
+        direction.x += 1.0;
     }
 
     if keyboard_input.pressed(KeyCode::Left) {
-        *direction.x_mut() -= 1.0;
+        direction.x -= 1.0;
     }
 
     for (character, sprite, rbhandle) in query.iter_mut() {
@@ -35,13 +35,13 @@ pub fn character_input_2d_keyboard_system(
                 continue;
             }
 
-            let half_width = sprite.size.x() / 2.0;
+            let half_width = sprite.size.x / 2.0;
 
             let mut position = rigidbody.position().clone();
 
-            let x = (position.translation.x + time.delta_seconds * direction.x() * character.speed)
-                .min(world_bounds.max.x() - half_width)
-                .max(world_bounds.min.x() + half_width);
+            let x = (position.translation.x + time.delta_seconds() * direction.x * character.speed)
+                .min(world_bounds.max.x - half_width)
+                .max(world_bounds.min.x + half_width);
             position.translation.x = x;
 
             rigidbody.set_next_kinematic_position(position);
@@ -57,7 +57,7 @@ pub fn character_grounded_systems(
 ) {
     for (mut character, sprite, rbhandle) in query.iter_mut() {
         if let Some(mut rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
-            let half_height = sprite.size.y() / 2.0;
+            let half_height = sprite.size.y / 2.0;
 
             let position = rigidbody.position();
 

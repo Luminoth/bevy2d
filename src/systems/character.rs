@@ -37,7 +37,7 @@ pub fn character_input_2d_keyboard_system(
 
             let half_width = sprite.size.x / 2.0;
 
-            let mut position = rigidbody.position().clone();
+            let mut position = *rigidbody.position();
 
             let x = (position.translation.x + time.delta_seconds() * direction.x * character.speed)
                 .min(world_bounds.max.x - half_width)
@@ -81,7 +81,7 @@ pub fn character_grounded_systems(
                 let point = ray.point_at(intersection.toi);
                 println!("point: {}", point);
 
-                let mut position = rigidbody.position().clone();
+                let mut position = *rigidbody.position();
                 println!("before: {}", position);
                 position.translation.y = point.coords.y + half_height;
                 println!("after: {}", position);

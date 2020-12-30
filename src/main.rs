@@ -96,6 +96,7 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
             ..Default::default()
         })
         .with(
+            //RigidBodyBuilder::new_kinematic()
             RigidBodyBuilder::new_dynamic()
                 .translation(0.0, 0.0)
                 .mass(70.0, false)

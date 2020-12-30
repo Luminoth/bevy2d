@@ -37,12 +37,14 @@ pub fn character_input_2d_keyboard_system(
 
             let half_width = sprite.size.x / 2.0;
 
-            let mut position = *rigidbody.position();
+            let mut position = *rigidbody.predicted_position();
+            println!("move before: {}", position);
 
             let x = (position.translation.x + time.delta_seconds() * direction.x * character.speed)
                 .min(world_bounds.max.x - half_width)
                 .max(world_bounds.min.x + half_width);
             position.translation.x = x;
+            println!("move after: {}", position);
 
             rigidbody.set_next_kinematic_position(position);
         }
@@ -78,15 +80,14 @@ pub fn character_grounded_systems(
                 }
 
                 // adjust position so we don't fall through the collision
+                let mut position = *rigidbody.predicted_position();
+                println!("before: {}", position);
                 let point = ray.point_at(intersection.toi);
                 println!("point: {}", point);
-
-                let mut position = *rigidbody.position();
-                println!("before: {}", position);
-                position.translation.y = point.coords.y + half_height;
+                position.translation.y = point.coords.y + half_height + 0.05;
                 println!("after: {}", position);
 
-                rigidbody.set_position(position, false);
+                rigidbody.set_next_kinematic_position(position);
             } else {
                 //println!("not grounded");
                 character.grounded = false;

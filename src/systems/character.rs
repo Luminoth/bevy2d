@@ -48,7 +48,7 @@ pub fn character_input_2d_keyboard_system(
             rigidbody.set_position(position, false);
 
             if character.grounded && keyboard_input.just_pressed(KeyCode::Space) {
-                println!("jump");
+                debug!("jump");
                 rigidbody.apply_impulse(character.jump_force, false)
             }
         }
@@ -96,7 +96,7 @@ pub fn character_grounded_systems(
             {
                 character.grounded = true;
                 if character.grounded != grounded {
-                    println!("setting grounded");
+                    debug!("setting grounded");
                 }
 
             // adjust position so we don't fall through the collision
@@ -108,7 +108,7 @@ pub fn character_grounded_systems(
             } else {
                 character.grounded = false;
                 if character.grounded != grounded {
-                    println!("not grounded");
+                    debug!("not grounded");
                 }
             }
         }

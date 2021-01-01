@@ -46,7 +46,7 @@ const PIXELS_PER_UNIT: f32 = 32.0;
 const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
 
 fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
-    println!("camera size: {}", CAMERA_SIZE);
+    info!("camera size: {}", CAMERA_SIZE);
 
     #[cfg(debug_assertions)]
     asset_server.watch_for_changes().unwrap();
@@ -64,7 +64,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
         .insert_resource(GameConfig {
             character_gravity: Vector::y() * CHARACTER_GRAVITY,
         })
-        .insert_resource(GameState::default());
+        .insert_resource(State::new(GameState::Game));
 }
 
 fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
@@ -165,7 +165,9 @@ fn setup_debug(commands: &mut Commands) {
     commands.insert_resource(DebugState::default());
 }
 
+#[bevy_main]
 fn main() {
+    // TODO: setup game state stages per https://bevyengine.org/news/bevy-0-4/
     App::build()
         .add_resource(WindowDescriptor {
             title: "Bevy 2D".to_owned(),
@@ -173,6 +175,10 @@ fn main() {
             height: WINDOW_HEIGHT,
             vsync: false,
             resizable: false,
+            ..Default::default()
+        })
+        .add_resource(bevy::log::LogSettings {
+            level: bevy::log::Level::DEBUG,
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)

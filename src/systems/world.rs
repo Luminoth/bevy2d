@@ -19,7 +19,7 @@ pub fn world_bounds_toggle_debug_system(
     // so this has to spawn / despawn a new entity
 
     for _ in event_reader.iter(&events) {
-        println!("Toggle world bounds debugging: {}", debug_state.enabled);
+        debug!("toggle world bounds debugging: {}", debug_state.enabled);
 
         for (entity, world_bounds) in query.iter() {
             /*if debug_state.enabled {

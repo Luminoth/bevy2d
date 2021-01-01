@@ -9,6 +9,9 @@ pub struct GameConfig {
     pub character_gravity: Vector<f32>,
 }
 
-/// Holds the main game state
-#[derive(Default)]
-pub struct GameState {}
+/// The game state
+#[derive(Copy, Clone)]
+pub enum GameState {
+    Menu,
+    Game,
+}

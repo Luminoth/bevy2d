@@ -46,7 +46,7 @@ impl CameraProjection for OrthoProjection {
 
     fn update(&mut self, width: f32, height: f32) {
         let aspect = width / height;
-        println!("aspect ratio {}", aspect);
+        info!("aspect ratio {}", aspect);
 
         match self.window_origin {
             WindowOrigin::Center => {

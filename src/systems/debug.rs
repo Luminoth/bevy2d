@@ -18,7 +18,7 @@ pub fn debug_system(
     mut debug_events: ResMut<Events<ToggleDebugEvent>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::D) {
-        println!("Toggling debug ...");
+        debug!("toggling debug ...");
 
         debug_state.enabled = !debug_state.enabled;
 

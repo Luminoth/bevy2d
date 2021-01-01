@@ -2,12 +2,13 @@
 
 use bevy::prelude::*;
 use bevy_rapier2d::physics::RigidBodyHandleComponent;
-use bevy_rapier2d::rapier::dynamics::{BodyStatus, RigidBodySet};
+use bevy_rapier2d::rapier::dynamics::RigidBodySet;
 use bevy_rapier2d::rapier::geometry::{ColliderSet, Ray};
 use bevy_rapier2d::rapier::math::{Point, Vector};
 use bevy_rapier2d::rapier::pipeline::QueryPipeline;
 
 use crate::components::character::*;
+use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::CHARACTER_COLLISION_GROUPS;
 
@@ -45,6 +46,26 @@ pub fn character_input_2d_keyboard_system(
             position.translation.x = x;
 
             rigidbody.set_position(position, false);
+
+            if character.grounded && keyboard_input.just_pressed(KeyCode::Space) {
+                println!("jump");
+                rigidbody.apply_impulse(character.jump_force, false)
+            }
+        }
+    }
+}
+
+pub fn character_gravity_multiplier(
+    game_config: Res<GameConfig>,
+    mut rigidbodies: ResMut<RigidBodySet>,
+    mut query: Query<(&Character, &RigidBodyHandleComponent)>,
+) {
+    for (character, rbhandle) in query.iter_mut() {
+        if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
+            if !character.grounded {
+                //rigidbody.apply_force(game_config.character_gravity, false);
+                //rigidbody.apply_impulse(game_config.character_gravity, false);
+            }
         }
     }
 }
@@ -56,7 +77,7 @@ pub fn character_grounded_systems(
     mut query: Query<(&mut Character, &Sprite, &RigidBodyHandleComponent)>,
 ) {
     for (mut character, sprite, rbhandle) in query.iter_mut() {
-        if let Some(mut rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
+        if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             let half_height = sprite.size.y / 2.0;
 
             let position = rigidbody.position();
@@ -75,18 +96,16 @@ pub fn character_grounded_systems(
                     println!("setting grounded");
                 }
 
-                // adjust position so we don't fall through the collision
-                let mut position = *rigidbody.position();
-                let point = ray.point_at(intersection.toi);
-                position.translation.y = point.coords.y + half_height + 0.05;
+            // adjust position so we don't fall through the collision
+            /*let mut position = *rigidbody.position();
+            let point = ray.point_at(intersection.toi);
+            position.translation.y = point.coords.y + half_height + 0.05;
 
-                rigidbody.set_position(position, false);
+            rigidbody.set_position(position, false);*/
             } else {
-                //println!("not grounded");
                 character.grounded = false;
                 if character.grounded != grounded {
-                    println!("setting dynamic");
-                    rigidbody.body_status = BodyStatus::Dynamic;
+                    println!("not grounded");
                 }
             }
         }

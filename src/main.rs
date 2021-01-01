@@ -33,6 +33,10 @@ static CHARACTER_COLLISION_GROUPS: Lazy<InteractionGroups> =
 
 const GRAVITY: f32 = -9.81;
 
+const CHARACTER_MASS: f32 = 70.0;
+const CHARACTER_GRAVITY: f32 = -750.0;
+const CHARACTER_JUMP_FORCE: f32 = 500.0;
+
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
 const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
@@ -57,6 +61,9 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         })
         // game state
+        .insert_resource(GameConfig {
+            character_gravity: Vector::y() * CHARACTER_GRAVITY,
+        })
         .insert_resource(GameState::default());
 }
 
@@ -81,7 +88,12 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
                 RigidBodyBuilder::new_static()
                     .translation((-ASPECT_RATIO * CAMERA_SIZE) + x as f32, -CAMERA_SIZE + 0.5),
             )
-            .with(ColliderBuilder::cuboid(0.5, 0.5).collision_groups(*WORLD_COLLISION_GROUPS));
+            .with(
+                ColliderBuilder::cuboid(0.5, 0.5)
+                    .collision_groups(*WORLD_COLLISION_GROUPS)
+                    .friction(0.0)
+                    .restitution(0.0),
+            );
     }
 
     // characters
@@ -93,16 +105,22 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
         })
         .with(Character {
             speed: 10.0,
+            jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
             ..Default::default()
         })
         .with(
             //RigidBodyBuilder::new_kinematic()
             RigidBodyBuilder::new_dynamic()
                 .translation(0.0, 0.0)
-                .mass(70.0, false)
+                .mass(CHARACTER_MASS, false)
                 .lock_rotations(),
         )
-        .with(ColliderBuilder::cuboid(0.5, 1.0).collision_groups(*CHARACTER_COLLISION_GROUPS));
+        .with(
+            ColliderBuilder::cuboid(0.5, 1.0)
+                .collision_groups(*CHARACTER_COLLISION_GROUPS)
+                .friction(0.0)
+                .restitution(0.0),
+        );
 }
 
 fn setup_ui(commands: &mut Commands) {
@@ -141,6 +159,7 @@ fn main() {
         .add_system(character_input_2d_keyboard_system.system())
         // physics
         .add_system(character_grounded_systems.system())
+        .add_system(character_gravity_multiplier.system())
         // debug
         .add_system(debug_system.system())
         .add_system(world_bounds_toggle_debug_system.system())

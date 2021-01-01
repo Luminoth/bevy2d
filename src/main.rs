@@ -35,7 +35,7 @@ const GRAVITY: f32 = -9.81;
 
 const CHARACTER_MASS: f32 = 100.0;
 const CHARACTER_GRAVITY: f32 = -750.0;
-const CHARACTER_JUMP_FORCE: f32 = 1000.0;
+const CHARACTER_JUMP_FORCE: f32 = 1500.0;
 
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
@@ -76,7 +76,7 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
     // world
     commands.insert_resource(world_bounds);
 
-    // floor
+    // ground
     commands
         .spawn(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
@@ -91,6 +91,45 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
                 .restitution(0.0),
         );
 
+    // platforms
+    commands
+        .spawn(SpriteBundle {
+            material: materials.add(Color::rgb(1.0, 1.0, 0.0).into()),
+            sprite: Sprite::new(Vec2::new(5.0, 1.0)),
+            ..Default::default()
+        })
+        .with(RigidBodyBuilder::new_static().translation(0.0, 0.0))
+        .with(
+            ColliderBuilder::cuboid(2.5, 0.5)
+                .collision_groups(*WORLD_COLLISION_GROUPS)
+                .friction(0.0)
+                .restitution(0.0),
+        )
+        .spawn(SpriteBundle {
+            material: materials.add(Color::rgb(0.0, 1.0, 1.0).into()),
+            sprite: Sprite::new(Vec2::new(5.0, 1.0)),
+            ..Default::default()
+        })
+        .with(RigidBodyBuilder::new_static().translation(-10.0, -5.0))
+        .with(
+            ColliderBuilder::cuboid(2.5, 0.5)
+                .collision_groups(*WORLD_COLLISION_GROUPS)
+                .friction(0.0)
+                .restitution(0.0),
+        )
+        .spawn(SpriteBundle {
+            material: materials.add(Color::rgb(0.0, 1.0, 1.0).into()),
+            sprite: Sprite::new(Vec2::new(5.0, 1.0)),
+            ..Default::default()
+        })
+        .with(RigidBodyBuilder::new_static().translation(10.0, -5.0))
+        .with(
+            ColliderBuilder::cuboid(2.5, 0.5)
+                .collision_groups(*WORLD_COLLISION_GROUPS)
+                .friction(0.0)
+                .restitution(0.0),
+        );
+
     // characters
     commands
         .spawn(SpriteBundle {
@@ -98,15 +137,10 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
             sprite: Sprite::new(Vec2::new(1.0, 2.0)),
             ..Default::default()
         })
-        .with(Character {
-            speed: 10.0,
-            jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
-            ..Default::default()
-        })
         .with(
             //RigidBodyBuilder::new_kinematic()
             RigidBodyBuilder::new_dynamic()
-                .translation(0.0, 0.0)
+                .translation(world_bounds.min.x + 1.0, world_bounds.min.y + 2.0)
                 .mass(CHARACTER_MASS, false)
                 .lock_rotations(),
         )
@@ -115,7 +149,12 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
                 .collision_groups(*CHARACTER_COLLISION_GROUPS)
                 .friction(0.0)
                 .restitution(0.0),
-        );
+        )
+        .with(Character {
+            speed: 10.0,
+            jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
+            ..Default::default()
+        });
 }
 
 fn setup_ui(commands: &mut Commands) {

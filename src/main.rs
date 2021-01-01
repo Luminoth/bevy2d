@@ -33,9 +33,9 @@ static CHARACTER_COLLISION_GROUPS: Lazy<InteractionGroups> =
 
 const GRAVITY: f32 = -9.81;
 
-const CHARACTER_MASS: f32 = 70.0;
+const CHARACTER_MASS: f32 = 100.0;
 const CHARACTER_GRAVITY: f32 = -750.0;
-const CHARACTER_JUMP_FORCE: f32 = 500.0;
+const CHARACTER_JUMP_FORCE: f32 = 1000.0;
 
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
@@ -68,33 +68,28 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
 }
 
 fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
-    // world
-    commands
-        // TODO: we need a component to update this whenever the window size changes
-        .insert_resource(WorldBounds2D {
-            min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
-            max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
-        });
+    let world_bounds = WorldBounds2D {
+        min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
+        max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
+    };
 
-    // TODO: spawning just a single floor that spans the entire width would be better
-    for x in 0..41 {
-        commands
-            .spawn(SpriteBundle {
-                material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
-                sprite: Sprite::new(Vec2::new(1.0, 1.0)),
-                ..Default::default()
-            })
-            .with(
-                RigidBodyBuilder::new_static()
-                    .translation((-ASPECT_RATIO * CAMERA_SIZE) + x as f32, -CAMERA_SIZE + 0.5),
-            )
-            .with(
-                ColliderBuilder::cuboid(0.5, 0.5)
-                    .collision_groups(*WORLD_COLLISION_GROUPS)
-                    .friction(0.0)
-                    .restitution(0.0),
-            );
-    }
+    // world
+    commands.insert_resource(world_bounds);
+
+    // floor
+    commands
+        .spawn(SpriteBundle {
+            material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
+            sprite: Sprite::new(Vec2::new(world_bounds.width(), 1.0)),
+            ..Default::default()
+        })
+        .with(RigidBodyBuilder::new_static().translation(0.0, world_bounds.min.y + 0.5))
+        .with(
+            ColliderBuilder::cuboid(world_bounds.width() / 2.0, 0.5)
+                .collision_groups(*WORLD_COLLISION_GROUPS)
+                .friction(0.0)
+                .restitution(0.0),
+        );
 
     // characters
     commands

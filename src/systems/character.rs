@@ -55,6 +55,8 @@ pub fn character_input_2d_keyboard_system(
     }
 }
 
+/// Characters fall faster for better mechanics
+/// without having to affect the gravity effects of everything else
 pub fn character_gravity_multiplier(
     game_config: Res<GameConfig>,
     mut rigidbodies: ResMut<RigidBodySet>,
@@ -63,13 +65,14 @@ pub fn character_gravity_multiplier(
     for (character, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             if !character.grounded {
-                //rigidbody.apply_force(game_config.character_gravity, false);
+                rigidbody.apply_force(game_config.character_gravity, false);
                 //rigidbody.apply_impulse(game_config.character_gravity, false);
             }
         }
     }
 }
 
+/// Checks whether a character is on the ground or not
 pub fn character_grounded_systems(
     qp: Res<QueryPipeline>,
     mut rigidbodies: ResMut<RigidBodySet>,
@@ -88,7 +91,7 @@ pub fn character_grounded_systems(
             );
 
             let grounded = character.grounded;
-            if let Some((_handle, _collider, intersection)) =
+            if let Some((_handle, _collider, _intersection)) =
                 qp.cast_ray(&colliders, &ray, 0.1, *CHARACTER_COLLISION_GROUPS)
             {
                 character.grounded = true;

@@ -58,7 +58,6 @@ pub fn debug_system(
 pub fn fps_text_system(
     time: Res<Time>,
     diagnostics: Res<Diagnostics>,
-    // TODO: should be Wuery<&mut Text, With<FPSText>>
     mut query: Query<(&mut Text, &FPSText)>,
 ) {
     for (mut text, _) in query.iter_mut() {

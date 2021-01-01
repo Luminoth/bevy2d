@@ -31,22 +31,20 @@ pub fn character_input_2d_keyboard_system(
 
     for (character, sprite, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
-            if !rigidbody.is_kinematic() {
+            /*if !character.grounded {
                 continue;
-            }
+            }*/
 
             let half_width = sprite.size.x / 2.0;
 
-            let mut position = *rigidbody.predicted_position();
-            println!("move before: {}", position);
+            let mut position = *rigidbody.position();
 
             let x = (position.translation.x + time.delta_seconds() * direction.x * character.speed)
                 .min(world_bounds.max.x - half_width)
                 .max(world_bounds.min.x + half_width);
             position.translation.x = x;
-            println!("move after: {}", position);
 
-            rigidbody.set_next_kinematic_position(position);
+            rigidbody.set_position(position, false);
         }
     }
 }
@@ -72,22 +70,17 @@ pub fn character_grounded_systems(
             if let Some((_handle, _collider, intersection)) =
                 qp.cast_ray(&colliders, &ray, 0.1, *CHARACTER_COLLISION_GROUPS)
             {
-                //println!("collision at: {:?}", intersection.toi);
                 character.grounded = true;
                 if character.grounded != grounded {
-                    println!("setting kinematic");
-                    rigidbody.body_status = BodyStatus::Kinematic;
+                    println!("setting grounded");
                 }
 
                 // adjust position so we don't fall through the collision
-                let mut position = *rigidbody.predicted_position();
-                println!("before: {}", position);
+                let mut position = *rigidbody.position();
                 let point = ray.point_at(intersection.toi);
-                println!("point: {}", point);
                 position.translation.y = point.coords.y + half_height + 0.05;
-                println!("after: {}", position);
 
-                rigidbody.set_next_kinematic_position(position);
+                rigidbody.set_position(position, false);
             } else {
                 //println!("not grounded");
                 character.grounded = false;

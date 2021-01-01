@@ -50,7 +50,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
     commands
         // cameras
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .spawn(Ortho2dComponents::new(CAMERA_SIZE))
+        .spawn(CameraOrtho2dBundle::new(CAMERA_SIZE))
         // physics
         .insert_resource(RapierConfiguration {
             gravity: Vector::y() * GRAVITY,

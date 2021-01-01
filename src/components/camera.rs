@@ -71,7 +71,7 @@ impl CameraProjection for OrthoProjection {
 
 /// Orthographic camera component bundle
 #[derive(Bundle)]
-pub struct Ortho2dComponents {
+pub struct CameraOrtho2dBundle {
     pub camera: Camera,
     pub orthographic_projection: OrthoProjection,
     pub visible_entities: VisibleEntities,
@@ -79,7 +79,7 @@ pub struct Ortho2dComponents {
     pub global_transform: GlobalTransform,
 }
 
-impl Ortho2dComponents {
+impl CameraOrtho2dBundle {
     pub fn new(size: f32) -> Self {
         // we want 0 to be "closest" and +far to be "farthest" in 2d, so we offset
         // the camera's translation by far and use a right handed coordinate system
@@ -103,7 +103,7 @@ impl Ortho2dComponents {
     }
 }
 
-impl Default for Ortho2dComponents {
+impl Default for CameraOrtho2dBundle {
     fn default() -> Self {
         Self::new(1.0)
     }

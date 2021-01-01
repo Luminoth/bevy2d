@@ -152,6 +152,7 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
         )
         .with(Character {
             speed: 10.0,
+            air_control_factor: 1.0,
             jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
             ..Default::default()
         });

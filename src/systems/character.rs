@@ -32,15 +32,17 @@ pub fn character_input_2d_keyboard_system(
 
     for (character, sprite, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
-            /*if !character.grounded {
-                continue;
-            }*/
+            // TODO: air control is kind of bad because we aren't factoring in momentum
+            let mut speed = character.speed;
+            if !character.grounded {
+                speed *= character.air_control_factor;
+            }
 
             let half_width = sprite.size.x / 2.0;
 
             let mut position = *rigidbody.position();
 
-            let x = (position.translation.x + time.delta_seconds() * direction.x * character.speed)
+            let x = (position.translation.x + time.delta_seconds() * direction.x * speed)
                 .min(world_bounds.max.x - half_width)
                 .max(world_bounds.min.x + half_width);
             position.translation.x = x;

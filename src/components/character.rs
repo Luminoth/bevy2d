@@ -8,6 +8,9 @@ pub struct Character {
     /// How fast the character moves (physics independent)
     pub speed: f32,
 
+    /// What % of the character speed should be allowed for air control
+    pub air_control_factor: f32,
+
     /// The character jump force
     pub jump_force: Vector<f32>,
 

@@ -93,8 +93,8 @@ pub fn character_grounded_systems(
             );
 
             let grounded = character.grounded;
-            if let Some((_handle, _collider, _intersection)) =
-                qp.cast_ray(&colliders, &ray, 0.1, *CHARACTER_COLLISION_GROUPS)
+            if let Some((_handle, _collider)) =
+                qp.cast_ray(&colliders, &ray, 0.1, true, *CHARACTER_COLLISION_GROUPS)
             {
                 character.grounded = true;
                 if character.grounded != grounded {

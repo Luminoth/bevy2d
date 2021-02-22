@@ -7,6 +7,7 @@ mod systems;
 
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::physics::{RapierConfiguration, RapierPhysicsPlugin};
 use bevy_rapier2d::rapier::dynamics::RigidBodyBuilder;
 use bevy_rapier2d::rapier::geometry::{ColliderBuilder, InteractionGroups};
@@ -141,7 +142,7 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
             //RigidBodyBuilder::new_kinematic()
             RigidBodyBuilder::new_dynamic()
                 .translation(world_bounds.min.x + 1.0, world_bounds.min.y + 2.0)
-                .mass(CHARACTER_MASS, false)
+                .mass(CHARACTER_MASS)
                 .lock_rotations(),
         )
         .with(
@@ -183,6 +184,7 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(ShapePlugin)
         .add_plugin(RapierPhysicsPlugin)
         //.add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)

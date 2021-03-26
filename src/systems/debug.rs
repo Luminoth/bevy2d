@@ -41,7 +41,7 @@ pub fn debug_system(
                     },
                     ..Default::default()
                 })
-                .with(FPSText);
+                .with(FpsText);
 
             debug_state.fps_text_entity = commands.current_entity();
         } else {
@@ -58,7 +58,7 @@ pub fn debug_system(
 pub fn fps_text_system(
     time: Res<Time>,
     diagnostics: Res<Diagnostics>,
-    mut query: Query<(&mut Text, &FPSText)>,
+    mut query: Query<(&mut Text, &FpsText)>,
 ) {
     for (mut text, _) in query.iter_mut() {
         let mut fps = 0.0;

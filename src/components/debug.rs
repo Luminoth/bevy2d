@@ -2,4 +2,4 @@
 
 /// Marker for FPS UI text
 #[derive(Default)]
-pub struct FPSText;
+pub struct FpsText;

@@ -51,7 +51,7 @@ pub fn character_input_2d_keyboard_system(
 
             if character.grounded && keyboard_input.just_pressed(KeyCode::Space) {
                 debug!("jump");
-                rigidbody.apply_impulse(character.jump_force, false)
+                rigidbody.apply_impulse(character.jump_force, true)
             }
         }
     }
@@ -67,8 +67,8 @@ pub fn character_gravity_multiplier(
     for (character, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             if !character.grounded {
-                rigidbody.apply_force(game_config.character_gravity, false);
-                //rigidbody.apply_impulse(game_config.character_gravity, false);
+                rigidbody.apply_force(game_config.character_gravity, true);
+                //rigidbody.apply_impulse(game_config.character_gravity, true);
             }
         }
     }

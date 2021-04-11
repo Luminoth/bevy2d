@@ -42,7 +42,7 @@ pub fn character_input_2d_keyboard_system(
 
             let mut position = *rigidbody.position();
 
-            let x = (position.translation.x + time.delta_seconds() * direction.x * speed)
+            let x = (position.translation.x + time.delta().as_secs_f32() * direction.x * speed)
                 .min(world_bounds.max.x - half_width)
                 .max(world_bounds.min.x + half_width);
             position.translation.x = x;
@@ -50,7 +50,6 @@ pub fn character_input_2d_keyboard_system(
             rigidbody.set_position(position, false);
 
             if character.grounded && keyboard_input.just_pressed(KeyCode::Space) {
-                debug!("jump");
                 rigidbody.apply_impulse(character.jump_force, true)
             }
         }
@@ -68,7 +67,6 @@ pub fn character_gravity_multiplier(
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             if !character.grounded {
                 rigidbody.apply_force(game_config.character_gravity, true);
-                //rigidbody.apply_impulse(game_config.character_gravity, true);
             }
         }
     }
@@ -92,26 +90,17 @@ pub fn character_grounded_systems(
                 Vector::y() * -1.0,
             );
 
-            let grounded = character.grounded;
-            if let Some((_handle, _collider)) =
-                qp.cast_ray(&colliders, &ray, 0.1, true, *CHARACTER_COLLISION_GROUPS)
-            {
+            if let Some((_handle, _collider)) = qp.cast_ray(
+                &colliders,
+                &ray,
+                0.1,
+                true,
+                *CHARACTER_COLLISION_GROUPS,
+                None,
+            ) {
                 character.grounded = true;
-                if character.grounded != grounded {
-                    debug!("setting grounded");
-                }
-
-            // adjust position so we don't fall through the collision
-            /*let mut position = *rigidbody.position();
-            let point = ray.point_at(intersection.toi);
-            position.translation.y = point.coords.y + half_height + 0.05;
-
-            rigidbody.set_position(position, false);*/
             } else {
                 character.grounded = false;
-                if character.grounded != grounded {
-                    debug!("not grounded");
-                }
             }
         }
     }

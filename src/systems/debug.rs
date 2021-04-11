@@ -11,11 +11,11 @@ use crate::resources::debug::*;
 ///
 /// Sends the ToggleDebugEvent
 pub fn debug_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut debug_state: ResMut<DebugState>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut debug_events: ResMut<Events<ToggleDebugEvent>>,
+    mut debug_events: EventWriter<ToggleDebugEvent>,
 ) {
     if keyboard_input.just_pressed(KeyCode::D) {
         debug!("toggling debug ...");
@@ -23,30 +23,31 @@ pub fn debug_system(
         debug_state.enabled = !debug_state.enabled;
 
         if debug_state.enabled {
-            commands
-                .spawn(TextBundle {
-                    style: Style {
-                        align_self: AlignSelf::FlexEnd,
-                        position_type: PositionType::Absolute,
-                        ..Default::default()
-                    },
-                    text: Text {
-                        value: "debug".to_owned(),
-                        font: asset_server.load("fonts/Roboto-Regular.ttf"),
-                        style: TextStyle {
-                            font_size: 30.0,
-                            color: Color::WHITE,
+            debug_state.fps_text_entity = Some(
+                commands
+                    .spawn_bundle(TextBundle {
+                        style: Style {
+                            align_self: AlignSelf::FlexEnd,
+                            position_type: PositionType::Absolute,
                             ..Default::default()
                         },
-                    },
-                    ..Default::default()
-                })
-                .with(FpsText);
-
-            debug_state.fps_text_entity = commands.current_entity();
+                        text: Text::with_section(
+                            "debug",
+                            TextStyle {
+                                font: asset_server.load("fonts/Roboto-Regular.ttf"),
+                                font_size: 30.0,
+                                color: Color::WHITE,
+                            },
+                            TextAlignment::default(),
+                        ),
+                        ..Default::default()
+                    })
+                    .insert(FpsText)
+                    .id(),
+            );
         } else {
             if let Some(fps_text) = debug_state.fps_text_entity.take() {
-                commands.despawn(fps_text);
+                commands.entity(fps_text).despawn();
             }
         }
 
@@ -68,7 +69,7 @@ pub fn fps_text_system(
             }
         }
 
-        let mut frame_time = time.delta_seconds_f64();
+        let mut frame_time = time.delta().as_secs_f64();
         if let Some(frame_time_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FRAME_TIME)
         {
             if let Some(frame_time_avg) = frame_time_diagnostic.average() {
@@ -76,6 +77,6 @@ pub fn fps_text_system(
             }
         }
 
-        text.value = format!("{:.1} fps, {:.3} ms/frame", fps, frame_time * 1000.0);
+        text.sections[0].value = format!("{:.1} fps, {:.3} ms/frame", fps, frame_time * 1000.0);
     }
 }

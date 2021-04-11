@@ -10,7 +10,7 @@ pub struct GameConfig {
 }
 
 /// The game state
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
     Menu,
     Game,

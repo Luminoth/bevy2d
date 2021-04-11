@@ -24,9 +24,11 @@ use systems::character::*;
 use systems::debug::*;
 use systems::world::*;
 
+// physics layers
 const WORLD_LAYER: u16 = 0b01;
 const CHARACTER_LAYER: u16 = 0b10;
 
+// physics collision groups
 static WORLD_COLLISION_GROUPS: Lazy<InteractionGroups> =
     Lazy::new(|| InteractionGroups::new(WORLD_LAYER, CHARACTER_LAYER));
 static CHARACTER_COLLISION_GROUPS: Lazy<InteractionGroups> =
@@ -46,29 +48,30 @@ const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
 const PIXELS_PER_UNIT: f32 = 32.0;
 const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
 
-fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     info!("camera size: {}", CAMERA_SIZE);
 
     #[cfg(debug_assertions)]
     asset_server.watch_for_changes().unwrap();
 
-    commands
-        // cameras
-        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .spawn(CameraOrtho2dBundle::new(CAMERA_SIZE))
-        // physics
-        .insert_resource(RapierConfiguration {
-            gravity: Vector::y() * GRAVITY,
-            ..Default::default()
-        })
-        // game state
-        .insert_resource(GameConfig {
-            character_gravity: Vector::y() * CHARACTER_GRAVITY,
-        })
-        .insert_resource(State::new(GameState::Game));
+    // cameras
+    commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
+    commands.spawn_bundle(CameraOrtho2dBundle::new(CAMERA_SIZE));
+
+    // physics
+    commands.insert_resource(RapierConfiguration {
+        gravity: Vector::y() * GRAVITY,
+        ..Default::default()
+    });
+
+    // game state
+    commands.insert_resource(GameConfig {
+        character_gravity: Vector::y() * CHARACTER_GRAVITY,
+    });
+    commands.insert_resource(State::new(GameState::Game));
 }
 
-fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
+fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
     let world_bounds = WorldBounds2D {
         min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
         max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
@@ -79,13 +82,13 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
 
     // ground
     commands
-        .spawn(SpriteBundle {
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
             sprite: Sprite::new(Vec2::new(world_bounds.width(), 1.0)),
             ..Default::default()
         })
-        .with(RigidBodyBuilder::new_static().translation(0.0, world_bounds.min.y + 0.5))
-        .with(
+        .insert(RigidBodyBuilder::new_static().translation(0.0, world_bounds.min.y + 0.5))
+        .insert(
             ColliderBuilder::cuboid(world_bounds.width() / 2.0, 0.5)
                 .collision_groups(*WORLD_COLLISION_GROUPS)
                 .friction(0.0)
@@ -94,37 +97,41 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
 
     // platforms
     commands
-        .spawn(SpriteBundle {
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 1.0, 0.0).into()),
             sprite: Sprite::new(Vec2::new(5.0, 1.0)),
             ..Default::default()
         })
-        .with(RigidBodyBuilder::new_static().translation(0.0, 0.0))
-        .with(
+        .insert(RigidBodyBuilder::new_static().translation(0.0, 0.0))
+        .insert(
             ColliderBuilder::cuboid(2.5, 0.5)
                 .collision_groups(*WORLD_COLLISION_GROUPS)
                 .friction(0.0)
                 .restitution(0.0),
-        )
-        .spawn(SpriteBundle {
+        );
+
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 1.0, 1.0).into()),
             sprite: Sprite::new(Vec2::new(5.0, 1.0)),
             ..Default::default()
         })
-        .with(RigidBodyBuilder::new_static().translation(-10.0, -5.0))
-        .with(
+        .insert(RigidBodyBuilder::new_static().translation(-10.0, -5.0))
+        .insert(
             ColliderBuilder::cuboid(2.5, 0.5)
                 .collision_groups(*WORLD_COLLISION_GROUPS)
                 .friction(0.0)
                 .restitution(0.0),
-        )
-        .spawn(SpriteBundle {
+        );
+
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 1.0, 1.0).into()),
             sprite: Sprite::new(Vec2::new(5.0, 1.0)),
             ..Default::default()
         })
-        .with(RigidBodyBuilder::new_static().translation(10.0, -5.0))
-        .with(
+        .insert(RigidBodyBuilder::new_static().translation(10.0, -5.0))
+        .insert(
             ColliderBuilder::cuboid(2.5, 0.5)
                 .collision_groups(*WORLD_COLLISION_GROUPS)
                 .friction(0.0)
@@ -133,25 +140,25 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
 
     // characters
     commands
-        .spawn(SpriteBundle {
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
             sprite: Sprite::new(Vec2::new(1.0, 2.0)),
             ..Default::default()
         })
-        .with(
+        .insert(
             //RigidBodyBuilder::new_kinematic()
             RigidBodyBuilder::new_dynamic()
                 .translation(world_bounds.min.x + 1.0, world_bounds.min.y + 2.0)
-                .mass(CHARACTER_MASS)
+                .additional_mass(CHARACTER_MASS)
                 .lock_rotations(),
         )
-        .with(
+        .insert(
             ColliderBuilder::cuboid(0.5, 1.0)
                 .collision_groups(*CHARACTER_COLLISION_GROUPS)
                 .friction(0.0)
                 .restitution(0.0),
         )
-        .with(Character {
+        .insert(Character {
             speed: 10.0,
             air_control_factor: 1.0,
             jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
@@ -159,11 +166,11 @@ fn setup_world(commands: &mut Commands, mut materials: ResMut<Assets<ColorMateri
         });
 }
 
-fn setup_ui(commands: &mut Commands) {
-    commands.spawn(CameraUiBundle::default());
+fn setup_ui(mut commands: Commands) {
+    commands.spawn_bundle(UiCameraBundle::default());
 }
 
-fn setup_debug(commands: &mut Commands) {
+fn setup_debug(mut commands: Commands) {
     commands.insert_resource(DebugState::default());
 }
 
@@ -171,7 +178,7 @@ fn setup_debug(commands: &mut Commands) {
 fn main() {
     // TODO: setup game state stages per https://bevyengine.org/news/bevy-0-4/
     App::build()
-        .add_resource(WindowDescriptor {
+        .insert_resource(WindowDescriptor {
             title: "Bevy 2D".to_owned(),
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT,
@@ -179,7 +186,7 @@ fn main() {
             resizable: false,
             ..Default::default()
         })
-        .add_resource(bevy::log::LogSettings {
+        .insert_resource(bevy::log::LogSettings {
             level: bevy::log::Level::DEBUG,
             ..Default::default()
         })
@@ -195,7 +202,7 @@ fn main() {
         .add_startup_system(setup_debug.system())
         // add internal camera system update
         .add_system_to_stage(
-            bevy::app::stage::POST_UPDATE,
+            bevy::app::CoreStage::PostUpdate,
             bevy::render::camera::camera_system::<OrthoProjection>.system(),
         )
         // input

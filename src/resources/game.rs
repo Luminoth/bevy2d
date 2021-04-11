@@ -14,4 +14,5 @@ pub struct GameConfig {
 pub enum GameState {
     Menu,
     Game,
+    GameOver,
 }

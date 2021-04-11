@@ -73,7 +73,7 @@ pub fn character_gravity_multiplier(
 }
 
 /// Checks whether a character is on the ground or not
-pub fn character_grounded_systems(
+pub fn character_grounded_system(
     qp: Res<QueryPipeline>,
     mut rigidbodies: ResMut<RigidBodySet>,
     colliders: Res<ColliderSet>,

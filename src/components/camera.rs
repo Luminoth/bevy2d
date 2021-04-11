@@ -101,6 +101,28 @@ impl CameraOrtho2dBundle {
             global_transform: Default::default(),
         }
     }
+
+    // TODO: how do we use ScalingMode?
+    /*pub fn new_2d() -> OrthographicCameraBundle {
+        // we want 0 to be "closest" and +far to be "farthest" in 2d, so we offset
+        // the camera's translation by far and use a right handed coordinate system
+        let far = 1000.0;
+        OrthographicCameraBundle {
+            camera: Camera {
+                name: Some(bevy::render::render_graph::base::camera::CAMERA_2D.to_string()),
+                ..Default::default()
+            },
+            orthographic_projection: bevy::render::camera::OrthographicProjection {
+                far,
+                depth_calculation: DepthCalculation::ZDifference,
+                scaling_mode: bevy::render::camera::ScalingMode::FixedHorizontal,
+                ..Default::default()
+            },
+            visible_entities: Default::default(),
+            transform: Transform::from_xyz(0.0, 0.0, far - 0.1),
+            global_transform: Default::default(),
+        }
+    }*/
 }
 
 impl Default for CameraOrtho2dBundle {

@@ -56,7 +56,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // cameras
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
+    //commands.spawn_bundle(OrthographicCameraBundle::new_2d());
     commands.spawn_bundle(CameraOrtho2dBundle::new(CAMERA_SIZE));
+    //commands.spawn_bundle(CameraOrtho2dBundle::new_2d());
 
     // physics
     commands.insert_resource(RapierConfiguration {
@@ -208,7 +210,7 @@ fn main() {
         // input
         .add_system(character_input_2d_keyboard_system.system())
         // physics
-        .add_system(character_grounded_systems.system())
+        .add_system(character_grounded_system.system())
         .add_system(character_gravity_multiplier.system())
         // debug
         .add_system(debug_system.system())

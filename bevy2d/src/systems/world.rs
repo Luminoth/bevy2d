@@ -2,8 +2,9 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
 
-use crate::events::debug::*;
-use crate::resources::debug::*;
+use core_lib::events::debug::*;
+use core_lib::resources::debug::*;
+
 use crate::resources::world::*;
 
 /// Toggls world bounds debugging on event

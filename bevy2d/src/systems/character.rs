@@ -7,19 +7,24 @@ use bevy_rapier2d::rapier::geometry::{ColliderSet, Ray};
 use bevy_rapier2d::rapier::math::{Point, Vector};
 use bevy_rapier2d::rapier::pipeline::QueryPipeline;
 
-use crate::components::character::*;
+use core_lib::components::character::*;
+
 use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::CHARACTER_COLLISION_GROUPS;
 
-/// Handles keyboard input for all kinematic characters
-// TODO: this should only apply to *player* characters
+/// Handles keyboard input for all kinematic player characters
 pub fn character_input_2d_keyboard_system(
     time: Res<Time>,
     world_bounds: Res<WorldBounds2D>,
     mut rigidbodies: ResMut<RigidBodySet>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&Character, &Sprite, &RigidBodyHandleComponent)>,
+    mut query: Query<(
+        &PlayerCharacter,
+        &Character,
+        &Sprite,
+        &RigidBodyHandleComponent,
+    )>,
 ) {
     let mut direction = Vec2::default();
     if keyboard_input.pressed(KeyCode::Right) {
@@ -30,7 +35,7 @@ pub fn character_input_2d_keyboard_system(
         direction.x -= 1.0;
     }
 
-    for (character, sprite, rbhandle) in query.iter_mut() {
+    for (_, character, sprite, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             // TODO: air control is kind of bad because we aren't factoring in momentum
             let mut speed = character.speed;

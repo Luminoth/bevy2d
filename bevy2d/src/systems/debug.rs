@@ -3,9 +3,9 @@
 use bevy::diagnostic::*;
 use bevy::prelude::*;
 
-use crate::components::debug::*;
-use crate::events::debug::*;
-use crate::resources::debug::*;
+use core_lib::components::debug::*;
+use core_lib::events::debug::*;
+use core_lib::resources::debug::*;
 
 /// Toggles debug on input
 ///

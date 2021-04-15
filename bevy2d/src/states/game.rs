@@ -6,8 +6,9 @@ use bevy_rapier2d::rapier::dynamics::RigidBodyBuilder;
 use bevy_rapier2d::rapier::geometry::ColliderBuilder;
 use bevy_rapier2d::rapier::math::Vector;
 
-use crate::components::camera::*;
-use crate::components::character::*;
+use core_lib::components::camera::*;
+use core_lib::components::character::*;
+
 use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::{
@@ -132,7 +133,8 @@ pub fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMat
             air_control_factor: 1.0,
             jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
             ..Default::default()
-        });
+        })
+        .insert(PlayerCharacter::default());
 }
 
 /// Setup the game UI

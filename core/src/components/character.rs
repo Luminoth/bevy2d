@@ -17,3 +17,7 @@ pub struct Character {
     /// Is the character on the ground?
     pub grounded: bool,
 }
+
+/// A... player character? sure
+#[derive(Default)]
+pub struct PlayerCharacter {}

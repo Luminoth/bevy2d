@@ -227,7 +227,6 @@ dependencies = [
  "bevy_prototype_lyon",
  "bevy_rapier2d",
  "core_lib",
- "derivative",
  "once_cell",
 ]
 
@@ -1104,6 +1103,11 @@ dependencies = [
 [[package]]
 name = "core_lib"
 version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_rapier2d",
+ "derivative",
+]
 
 [[package]]
 name = "coreaudio-rs"

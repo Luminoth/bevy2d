@@ -13,9 +13,10 @@ use bevy_rapier2d::physics::RapierPhysicsPlugin;
 use bevy_rapier2d::rapier::geometry::InteractionGroups;
 use once_cell::sync::Lazy;
 
-use components::camera::*;
-use events::debug::*;
-use resources::debug::*;
+use core_lib::components::camera::*;
+use core_lib::events::debug::*;
+use core_lib::resources::debug::*;
+
 use states::*;
 use systems::character::*;
 use systems::debug::*;

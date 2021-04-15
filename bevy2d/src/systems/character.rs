@@ -19,12 +19,7 @@ pub fn character_input_2d_keyboard_system(
     world_bounds: Res<WorldBounds2D>,
     mut rigidbodies: ResMut<RigidBodySet>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(
-        &PlayerCharacter,
-        &Character,
-        &Sprite,
-        &RigidBodyHandleComponent,
-    )>,
+    mut query: Query<(&Character, &Sprite, &RigidBodyHandleComponent), With<PlayerCharacter>>,
 ) {
     let mut direction = Vec2::default();
     if keyboard_input.pressed(KeyCode::Right) {
@@ -35,7 +30,7 @@ pub fn character_input_2d_keyboard_system(
         direction.x -= 1.0;
     }
 
-    for (_, character, sprite, rbhandle) in query.iter_mut() {
+    for (character, sprite, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             // TODO: air control is kind of bad because we aren't factoring in momentum
             let mut speed = character.speed;

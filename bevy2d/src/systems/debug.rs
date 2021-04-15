@@ -59,9 +59,9 @@ pub fn debug_system(
 pub fn fps_text_system(
     time: Res<Time>,
     diagnostics: Res<Diagnostics>,
-    mut query: Query<(&mut Text, &FpsText)>,
+    mut query: Query<&mut Text, With<FpsText>>,
 ) {
-    for (mut text, _) in query.iter_mut() {
+    for mut text in query.iter_mut() {
         let mut fps = 0.0;
         if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(fps_avg) = fps_diagnostic.average() {

@@ -81,7 +81,17 @@ fn main() {
         // game states
         .add_state(GameState::Menu)
         .add_system_set(
+            SystemSet::on_enter(GameState::Menu)
+                .with_system(states::menu::setup.system())
+                .with_system(states::menu::setup_ui.system()),
+        )
+        .add_system_set(
             SystemSet::on_update(GameState::Menu).with_system(states::menu::on_update.system()),
+        )
+        .add_system_set(
+            SystemSet::on_exit(GameState::Menu)
+                .with_system(states::menu::teardown_ui.system())
+                .with_system(states::menu::teardown.system()),
         )
         .add_system_set(
             SystemSet::on_enter(GameState::Game)
@@ -100,6 +110,12 @@ fn main() {
                 .with_system(debug_system.system())
                 .with_system(world_bounds_toggle_debug_system.system())
                 .with_system(fps_text_system.system()),
+        )
+        .add_system_set(
+            SystemSet::on_exit(GameState::Game)
+                .with_system(states::game::teardown_ui.system())
+                .with_system(states::game::teardown_world.system())
+                .with_system(states::game::teardown.system()),
         )
         // setup
         .add_startup_system(setup.system())

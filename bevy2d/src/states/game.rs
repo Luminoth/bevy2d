@@ -16,8 +16,6 @@ use crate::{
     CHARACTER_MASS, GRAVITY, WORLD_COLLISION_GROUPS,
 };
 
-// TODO: need cleanup functions to despawn all the entities
-
 /// Game setup
 pub fn setup(mut commands: Commands) {
     info!("camera size: {}", CAMERA_SIZE);
@@ -38,6 +36,15 @@ pub fn setup(mut commands: Commands) {
     commands.insert_resource(GameConfig {
         character_gravity: Vector::y() * CHARACTER_GRAVITY,
     });
+}
+
+/// Game teardown
+pub fn teardown(mut commands: Commands) {
+    // TODO: camera bundle
+
+    commands.remove_resource::<GameConfig>();
+    commands.remove_resource::<RapierConfiguration>();
+    commands.remove_resource::<ClearColor>();
 }
 
 /// Setup the game world
@@ -137,7 +144,19 @@ pub fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMat
         .insert(PlayerCharacter::default());
 }
 
+/// Tear down the game world
+pub fn teardown_world(mut commands: Commands) {
+    // TODO: despawn entities
+
+    commands.remove_resource::<WorldBounds2D>();
+}
+
 /// Setup the game UI
 pub fn setup_ui(mut commands: Commands) {
     commands.spawn_bundle(UiCameraBundle::default());
+}
+
+/// Tear down the game UI
+pub fn teardown_ui(mut _commands: Commands) {
+    // TODO: camera bundle
 }

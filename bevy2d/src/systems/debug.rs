@@ -47,7 +47,7 @@ pub fn debug_system(
             );
         } else {
             if let Some(fps_text) = debug_state.fps_text_entity.take() {
-                commands.entity(fps_text).despawn();
+                commands.entity(fps_text).despawn_recursive();
             }
         }
 

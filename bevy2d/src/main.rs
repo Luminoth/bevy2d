@@ -16,7 +16,9 @@ use once_cell::sync::Lazy;
 use core_lib::components::camera::*;
 use core_lib::events::debug::*;
 use core_lib::resources::debug::*;
+use core_lib::systems::input::*;
 
+use events::character::*;
 use states::*;
 use systems::character::*;
 use systems::debug::*;
@@ -78,6 +80,7 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin)
         // events
         .add_event::<ToggleDebugEvent>()
+        .add_event::<JumpEvent>()
         // game states
         .add_state(GameState::Menu)
         .add_system_set(
@@ -102,7 +105,14 @@ fn main() {
         .add_system_set(
             SystemSet::on_update(GameState::Game)
                 // input
-                .with_system(character_input_2d_keyboard_system.system())
+                .with_system(
+                    platformer_2d_keyboard_input
+                        .system()
+                        .label("character_input"),
+                )
+                .with_system(character_movement.system().after("character_input"))
+                .with_system(jump_input.system().label("character_jump_input"))
+                .with_system(character_jump.system().after("character_jump_input"))
                 // physics
                 .with_system(character_grounded_system.system())
                 .with_system(character_gravity_multiplier.system())

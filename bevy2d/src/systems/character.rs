@@ -8,28 +8,21 @@ use bevy_rapier2d::rapier::math::{Point, Vector};
 use bevy_rapier2d::rapier::pipeline::QueryPipeline;
 
 use core_lib::components::character::*;
+use core_lib::resources::input::*;
 
+use crate::events::character::*;
 use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::CHARACTER_COLLISION_GROUPS;
 
-/// Handles keyboard input for all kinematic player characters
-pub fn character_input_2d_keyboard_system(
+/// Handles player character movement
+pub fn character_movement(
     time: Res<Time>,
     world_bounds: Res<WorldBounds2D>,
     mut rigidbodies: ResMut<RigidBodySet>,
-    keyboard_input: Res<Input<KeyCode>>,
+    input: Res<CharacterInput2D>,
     mut query: Query<(&Character, &Sprite, &RigidBodyHandleComponent), With<PlayerCharacter>>,
 ) {
-    let mut direction = Vec2::default();
-    if keyboard_input.pressed(KeyCode::Right) {
-        direction.x += 1.0;
-    }
-
-    if keyboard_input.pressed(KeyCode::Left) {
-        direction.x -= 1.0;
-    }
-
     for (character, sprite, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             // TODO: air control is kind of bad because we aren't factoring in momentum
@@ -42,17 +35,38 @@ pub fn character_input_2d_keyboard_system(
 
             let mut position = *rigidbody.position();
 
-            let x = (position.translation.x + time.delta().as_secs_f32() * direction.x * speed)
+            let x = (position.translation.x
+                + time.delta().as_secs_f32() * input.direction.x * speed)
                 .min(world_bounds.max.x - half_width)
                 .max(world_bounds.min.x + half_width);
             position.translation.x = x;
 
             rigidbody.set_position(position, false);
+        }
+    }
+}
 
-            if character.grounded && keyboard_input.just_pressed(KeyCode::Space) {
-                rigidbody.apply_impulse(character.jump_force, true)
+/// Handles player character jump events
+pub fn character_jump(
+    mut rigidbodies: ResMut<RigidBodySet>,
+    mut event_reader: EventReader<JumpEvent>,
+    mut query: Query<(&Character, &RigidBodyHandleComponent), With<PlayerCharacter>>,
+) {
+    for _ in event_reader.iter() {
+        for (character, rbhandle) in query.iter_mut() {
+            if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
+                if character.grounded {
+                    rigidbody.apply_impulse(character.jump_force, true)
+                }
             }
         }
+    }
+}
+
+/// Handles jump input
+pub fn jump_input(keyboard_input: Res<Input<KeyCode>>, mut jump_events: EventWriter<JumpEvent>) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        jump_events.send(JumpEvent);
     }
 }
 

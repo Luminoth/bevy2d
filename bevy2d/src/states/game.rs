@@ -8,6 +8,7 @@ use bevy_rapier2d::rapier::math::Vector;
 
 use core_lib::components::camera::*;
 use core_lib::components::character::*;
+use core_lib::resources::input::*;
 
 use crate::resources::game::*;
 use crate::resources::world::*;
@@ -44,6 +45,7 @@ pub fn setup(mut commands: Commands) {
     });
 
     // game state
+    commands.insert_resource(CharacterInput2D::default());
     commands.insert_resource(GameConfig {
         character_gravity: Vector::y() * CHARACTER_GRAVITY,
     });
@@ -59,6 +61,7 @@ pub fn teardown(mut commands: Commands, mut entities: ResMut<GameEntities>) {
 
     commands.remove_resource::<GameEntities>();
 
+    commands.remove_resource::<CharacterInput2D>();
     commands.remove_resource::<GameConfig>();
     commands.remove_resource::<RapierConfiguration>();
     commands.remove_resource::<ClearColor>();

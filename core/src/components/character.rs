@@ -21,3 +21,7 @@ pub struct Character {
 /// A... player character? sure
 #[derive(Default)]
 pub struct PlayerCharacter {}
+
+/// A... non-player character? probably
+#[derive(Default)]
+pub struct NonPlayerCharacter {}

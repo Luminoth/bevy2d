@@ -6,7 +6,7 @@ mod resources;
 mod states;
 mod systems;
 
-use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::diagnostic::*;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::physics::RapierPhysicsPlugin;
@@ -78,6 +78,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin)
         //.add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
+        //.add_plugin(LogDiagnosticsPlugin::default())
         // events
         .add_event::<ToggleDebugEvent>()
         .add_event::<JumpEvent>()
@@ -94,7 +95,8 @@ fn main() {
         .add_system_set(
             SystemSet::on_exit(GameState::Menu)
                 .with_system(states::menu::teardown_ui.system())
-                .with_system(states::menu::teardown.system()),
+                .with_system(states::menu::teardown.system())
+                .with_system(core_lib::states::teardown.system()),
         )
         .add_system_set(
             SystemSet::on_enter(GameState::Game)
@@ -125,7 +127,16 @@ fn main() {
             SystemSet::on_exit(GameState::Game)
                 .with_system(states::game::teardown_ui.system())
                 .with_system(states::game::teardown_world.system())
-                .with_system(states::game::teardown.system()),
+                .with_system(states::game::teardown.system())
+                .with_system(core_lib::states::teardown.system()),
+        )
+        .add_system_set(
+            SystemSet::on_enter(GameState::GameOver).with_system(states::gameover::setup.system()),
+        )
+        .add_system_set(
+            SystemSet::on_exit(GameState::GameOver)
+                .with_system(states::gameover::teardown.system())
+                .with_system(core_lib::states::teardown.system()),
         )
         // setup
         .add_startup_system(setup.system())

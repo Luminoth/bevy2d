@@ -1,6 +1,7 @@
 //! Game states
 
 pub mod game;
+pub mod gameover;
 pub mod menu;
 
 /// The game state
@@ -8,4 +9,5 @@ pub mod menu;
 pub enum GameState {
     Menu,
     Game,
+    GameOver,
 }

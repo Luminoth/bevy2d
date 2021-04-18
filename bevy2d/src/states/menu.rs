@@ -47,7 +47,7 @@ pub fn teardown(mut commands: Commands, mut entities: ResMut<MenuEntities>) {
 #[derive(Default)]
 pub struct MenuUIEntities {
     camera: Option<Entity>,
-    play_button: Option<Entity>,
+    root: Option<Entity>,
 }
 
 /// Setup the menu UI
@@ -64,32 +64,44 @@ pub fn setup_ui(
 
     let mut entities = MenuUIEntities::default();
 
-    entities.play_button = Some(
+    entities.root = Some(
         commands
-            .spawn_bundle(ButtonBundle {
+            .spawn_bundle(NodeBundle {
                 style: Style {
-                    size: Size::new(Val::Px(150.0), Val::Px(65.0)),
-                    margin: Rect::all(Val::Auto),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
+                    size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                    justify_content: JustifyContent::SpaceBetween,
                     ..Default::default()
                 },
-                material: button_materials.normal.clone(),
+                material: materials.add(Color::NONE.into()),
                 ..Default::default()
             })
             .with_children(|parent| {
-                parent.spawn_bundle(TextBundle {
-                    text: Text::with_section(
-                        "Play",
-                        TextStyle {
-                            font: asset_server.load("fonts/Roboto-Regular.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.9, 0.9, 0.9),
+                parent
+                    .spawn_bundle(ButtonBundle {
+                        style: Style {
+                            size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                            margin: Rect::all(Val::Auto),
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            ..Default::default()
                         },
-                        Default::default(),
-                    ),
-                    ..Default::default()
-                });
+                        material: button_materials.normal.clone(),
+                        ..Default::default()
+                    })
+                    .with_children(|parent| {
+                        parent.spawn_bundle(TextBundle {
+                            text: Text::with_section(
+                                "Play",
+                                TextStyle {
+                                    font: asset_server.load("fonts/Roboto-Regular.ttf"),
+                                    font_size: 40.0,
+                                    color: Color::rgb(0.9, 0.9, 0.9),
+                                },
+                                Default::default(),
+                            ),
+                            ..Default::default()
+                        });
+                    });
             })
             .id(),
     );
@@ -107,8 +119,8 @@ pub fn teardown_ui(mut commands: Commands, mut entities: ResMut<MenuUIEntities>)
         commands.entity(camera).despawn_recursive();
     }
 
-    if let Some(play_button) = entities.play_button.take() {
-        commands.entity(play_button).despawn_recursive();
+    if let Some(root) = entities.root.take() {
+        commands.entity(root).despawn_recursive();
     }
 
     commands.remove_resource::<MenuUIEntities>();

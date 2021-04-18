@@ -107,6 +107,7 @@ fn main() {
         .add_system_set(
             SystemSet::on_update(GameState::Game)
                 .with_system(states::game::on_update.system())
+                .with_system(states::game::update_ui.system())
                 // input
                 .with_system(
                     platformer_2d_keyboard_input

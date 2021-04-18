@@ -46,7 +46,7 @@ pub fn setup(mut commands: Commands) {
         character_gravity: Vector::y() * CHARACTER_GRAVITY,
     });
     commands.insert_resource(Game {
-        timer: Timer::from_seconds(60.0, false),
+        timer: Timer::from_seconds(30.0, false),
     });
 }
 
@@ -161,8 +161,31 @@ pub fn teardown_world(mut commands: Commands) {
     commands.remove_resource::<WorldBounds2D>();
 }
 
+#[derive(Default)]
+pub struct TimerText;
+
 /// Setup the game UI
-pub fn setup_ui(mut commands: Commands) {
+pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                ..Default::default()
+            },
+            text: Text::with_section(
+                "timer",
+                TextStyle {
+                    font: asset_server.load("fonts/Roboto-Regular.ttf"),
+                    font_size: 30.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment::default(),
+            ),
+            ..Default::default()
+        })
+        .insert(TimerText);
+
     commands.spawn_bundle(UiCameraBundle::default());
 }
 
@@ -173,5 +196,14 @@ pub fn on_update(time: Res<Time>, mut game: ResMut<Game>, mut state: ResMut<Stat
     if game.timer.tick(time.delta()).just_finished() {
         info!("Game over!");
         state.push(GameState::GameOver).unwrap();
+    }
+}
+
+pub fn update_ui(game: Res<Game>, mut query: Query<&mut Text, With<TimerText>>) {
+    for mut text in query.iter_mut() {
+        text.sections[0].value = format!(
+            "{}",
+            (game.timer.duration().as_secs_f32() - game.timer.elapsed_secs()) as i64
+        );
     }
 }

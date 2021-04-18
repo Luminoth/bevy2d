@@ -18,6 +18,7 @@ use crate::{
     CHARACTER_MASS, GRAVITY, WORLD_COLLISION_GROUPS,
 };
 
+/// Main game state
 #[derive(Default)]
 pub struct Game {
     timer: Timer,
@@ -161,6 +162,7 @@ pub fn teardown_world(mut commands: Commands) {
     commands.remove_resource::<WorldBounds2D>();
 }
 
+/// Timer text marker
 #[derive(Default)]
 pub struct TimerText;
 
@@ -192,6 +194,7 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 /// Tear down the game UI
 pub fn teardown_ui(mut _commands: Commands) {}
 
+/// Main game update
 pub fn on_update(time: Res<Time>, mut game: ResMut<Game>, mut state: ResMut<State<GameState>>) {
     if game.timer.tick(time.delta()).just_finished() {
         info!("Game over!");
@@ -199,6 +202,7 @@ pub fn on_update(time: Res<Time>, mut game: ResMut<Game>, mut state: ResMut<Stat
     }
 }
 
+/// Game UI update
 pub fn update_ui(game: Res<Game>, mut query: Query<&mut Text, With<TimerText>>) {
     for mut text in query.iter_mut() {
         text.sections[0].value = format!(

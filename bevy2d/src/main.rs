@@ -134,6 +134,10 @@ fn main() {
             SystemSet::on_enter(GameState::GameOver).with_system(states::gameover::setup.system()),
         )
         .add_system_set(
+            SystemSet::on_update(GameState::GameOver)
+                .with_system(states::gameover::on_update.system()),
+        )
+        .add_system_set(
             SystemSet::on_exit(GameState::GameOver)
                 .with_system(states::gameover::teardown.system())
                 .with_system(core_lib::states::teardown.system()),

@@ -106,6 +106,7 @@ fn main() {
         )
         .add_system_set(
             SystemSet::on_update(GameState::Game)
+                .with_system(states::game::on_update.system())
                 // input
                 .with_system(
                     platformer_2d_keyboard_input
@@ -119,9 +120,7 @@ fn main() {
                 .with_system(character_grounded_system.system())
                 .with_system(character_gravity_multiplier.system())
                 // debug
-                .with_system(debug_system.system())
-                .with_system(world_bounds_toggle_debug_system.system())
-                .with_system(fps_text_system.system()),
+                .with_system(world_bounds_toggle_debug_system.system()),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::Game)
@@ -146,5 +145,8 @@ fn main() {
             bevy::app::CoreStage::PostUpdate,
             bevy::render::camera::camera_system::<OrthoProjection>.system(),
         )
+        // debug
+        .add_system(debug_system.system())
+        .add_system(fps_text_system.system())
         .run();
 }

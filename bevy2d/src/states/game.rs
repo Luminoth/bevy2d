@@ -12,13 +12,16 @@ use core_lib::resources::input::*;
 
 use crate::resources::game::*;
 use crate::resources::world::*;
+use crate::states::*;
 use crate::{
     ASPECT_RATIO, CAMERA_SIZE, CHARACTER_COLLISION_GROUPS, CHARACTER_GRAVITY, CHARACTER_JUMP_FORCE,
     CHARACTER_MASS, GRAVITY, WORLD_COLLISION_GROUPS,
 };
 
 #[derive(Default)]
-pub struct Game {}
+pub struct Game {
+    timer: Timer,
+}
 
 /// Game setup
 pub fn setup(mut commands: Commands) {
@@ -42,7 +45,9 @@ pub fn setup(mut commands: Commands) {
     commands.insert_resource(GameConfig {
         character_gravity: Vector::y() * CHARACTER_GRAVITY,
     });
-    commands.insert_resource(Game {});
+    commands.insert_resource(Game {
+        timer: Timer::from_seconds(60.0, false),
+    });
 }
 
 /// Game teardown
@@ -163,3 +168,10 @@ pub fn setup_ui(mut commands: Commands) {
 
 /// Tear down the game UI
 pub fn teardown_ui(mut _commands: Commands) {}
+
+pub fn on_update(time: Res<Time>, mut game: ResMut<Game>, mut state: ResMut<State<GameState>>) {
+    if game.timer.tick(time.delta()).just_finished() {
+        info!("Game over!");
+        state.push(GameState::GameOver).unwrap();
+    }
+}

@@ -173,10 +173,15 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
+                position: Rect {
+                    top: Val::Px(5.0),
+                    right: Val::Px(15.0),
+                    ..Default::default()
+                },
                 ..Default::default()
             },
             text: Text::with_section(
-                "timer",
+                "0",
                 TextStyle {
                     font: asset_server.load("fonts/Roboto-Regular.ttf"),
                     font_size: 30.0,

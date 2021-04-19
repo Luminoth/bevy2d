@@ -29,10 +29,15 @@ pub fn debug_system(
                         style: Style {
                             align_self: AlignSelf::FlexEnd,
                             position_type: PositionType::Absolute,
+                            position: Rect {
+                                top: Val::Px(5.0),
+                                left: Val::Px(15.0),
+                                ..Default::default()
+                            },
                             ..Default::default()
                         },
                         text: Text::with_section(
-                            "debug",
+                            "fps",
                             TextStyle {
                                 font: asset_server.load("fonts/Roboto-Regular.ttf"),
                                 font_size: 30.0,

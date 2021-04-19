@@ -19,10 +19,12 @@ use core_lib::resources::debug::*;
 use core_lib::systems::input::*;
 
 use events::character::*;
+use events::PauseEvent;
 use states::*;
 use systems::character::*;
 use systems::debug::*;
 use systems::world::*;
+use systems::{pause, pause_input};
 
 // physics layers
 const WORLD_LAYER: u16 = 0b01;
@@ -81,6 +83,7 @@ fn main() {
         //.add_plugin(LogDiagnosticsPlugin::default())
         // events
         .add_event::<ToggleDebugEvent>()
+        .add_event::<PauseEvent>()
         .add_event::<JumpEvent>()
         // game states
         .add_state(GameState::Menu)
@@ -109,6 +112,8 @@ fn main() {
                 .with_system(states::game::on_update.system())
                 .with_system(states::game::update_ui.system())
                 // input
+                .with_system(pause_input.system().label("pause_input"))
+                .with_system(pause.system().label("pause").after("pause_input"))
                 .with_system(
                     platformer_2d_keyboard_input
                         .system()
@@ -120,6 +125,7 @@ fn main() {
                 // physics
                 .with_system(character_grounded_system.system())
                 .with_system(character_gravity_multiplier.system())
+                .with_system(character_pause.system().after("pause"))
                 // debug
                 .with_system(world_bounds_toggle_debug_system.system()),
         )

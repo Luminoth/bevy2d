@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use bevy_rapier2d::physics::RigidBodyHandleComponent;
-use bevy_rapier2d::rapier::dynamics::RigidBodySet;
+use bevy_rapier2d::rapier::dynamics::{BodyStatus, RigidBodySet};
 use bevy_rapier2d::rapier::geometry::{ColliderSet, Ray};
 use bevy_rapier2d::rapier::math::{Point, Vector};
 use bevy_rapier2d::rapier::pipeline::QueryPipeline;
@@ -11,18 +11,25 @@ use core_lib::components::character::*;
 use core_lib::resources::input::*;
 
 use crate::events::character::*;
+use crate::events::PauseEvent;
 use crate::resources::game::*;
 use crate::resources::world::*;
+use crate::states::game::Game;
 use crate::CHARACTER_COLLISION_GROUPS;
 
 /// Handles player character movement
 pub fn character_movement(
     time: Res<Time>,
     world_bounds: Res<WorldBounds2D>,
+    game: Res<Game>,
     mut rigidbodies: ResMut<RigidBodySet>,
     input: Res<CharacterInput2D>,
     mut query: Query<(&Character, &Sprite, &RigidBodyHandleComponent), With<PlayerCharacter>>,
 ) {
+    if game.paused {
+        return;
+    }
+
     for (character, sprite, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             // TODO: air control is kind of bad because we aren't factoring in momentum
@@ -48,10 +55,15 @@ pub fn character_movement(
 
 /// Handles player character jump events
 pub fn character_jump(
+    game: Res<Game>,
     mut rigidbodies: ResMut<RigidBodySet>,
     mut event_reader: EventReader<JumpEvent>,
     mut query: Query<(&Character, &RigidBodyHandleComponent), With<PlayerCharacter>>,
 ) {
+    if game.paused {
+        return;
+    }
+
     for _ in event_reader.iter() {
         for (character, rbhandle) in query.iter_mut() {
             if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
@@ -70,13 +82,38 @@ pub fn jump_input(keyboard_input: Res<Input<KeyCode>>, mut jump_events: EventWri
     }
 }
 
+/// Handles pause events for characters
+pub fn character_pause(
+    game: Res<Game>,
+    mut rigidbodies: ResMut<RigidBodySet>,
+    mut event_reader: EventReader<PauseEvent>,
+    mut query: Query<&RigidBodyHandleComponent, With<PlayerCharacter>>,
+) {
+    for _ in event_reader.iter() {
+        for rbhandle in query.iter_mut() {
+            if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
+                rigidbody.set_body_status(if game.paused {
+                    BodyStatus::Kinematic
+                } else {
+                    BodyStatus::Dynamic
+                })
+            }
+        }
+    }
+}
+
 /// Characters fall faster for better mechanics
 /// without having to affect the gravity effects of everything else
 pub fn character_gravity_multiplier(
+    game: Res<Game>,
     game_config: Res<GameConfig>,
     mut rigidbodies: ResMut<RigidBodySet>,
     mut query: Query<(&Character, &RigidBodyHandleComponent)>,
 ) {
+    if game.paused {
+        return;
+    }
+
     for (character, rbhandle) in query.iter_mut() {
         if let Some(rigidbody) = rigidbodies.get_mut(rbhandle.handle()) {
             if !character.grounded {

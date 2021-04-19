@@ -131,7 +131,9 @@ fn main() {
                 .with_system(core_lib::states::teardown.system()),
         )
         .add_system_set(
-            SystemSet::on_enter(GameState::GameOver).with_system(states::gameover::setup.system()),
+            SystemSet::on_enter(GameState::GameOver)
+                .with_system(states::gameover::setup.system())
+                .with_system(states::gameover::setup_ui.system()),
         )
         .add_system_set(
             SystemSet::on_update(GameState::GameOver)
@@ -139,7 +141,9 @@ fn main() {
         )
         .add_system_set(
             SystemSet::on_exit(GameState::GameOver)
+                .with_system(states::gameover::teardown_ui.system())
                 .with_system(states::gameover::teardown.system())
+                // TODO: this is gross but it's the best "complete" cleanup from the game over sub-state
                 .with_system(core_lib::states::teardown.system()),
         )
         // setup

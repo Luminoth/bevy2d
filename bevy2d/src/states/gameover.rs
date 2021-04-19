@@ -16,6 +16,36 @@ pub fn teardown(mut commands: Commands) {
     commands.remove_resource::<GameOverTimer>();
 }
 
+/// Setup the game UI
+pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // TODO: this should be centered
+    commands.spawn_bundle(TextBundle {
+        style: Style {
+            align_self: AlignSelf::FlexEnd,
+            position_type: PositionType::Absolute,
+            position: Rect {
+                top: Val::Px(5.0),
+                right: Val::Px(15.0),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        text: Text::with_section(
+            "Game Over",
+            TextStyle {
+                font: asset_server.load("fonts/Roboto-Regular.ttf"),
+                font_size: 30.0,
+                color: Color::WHITE,
+            },
+            TextAlignment::default(),
+        ),
+        ..Default::default()
+    });
+}
+
+/// Tear down the game UI
+pub fn teardown_ui(mut _commands: Commands) {}
+
 /// Game over state update
 pub fn on_update(
     time: Res<Time>,

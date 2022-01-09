@@ -27,22 +27,22 @@ pub fn world_bounds_toggle_debug_system(
 
             if debug_state.enabled {
                 let shape = shapes::Rectangle {
-                    width: world_bounds.width(),
-                    height: world_bounds.height(),
-                    ..Default::default()
+                    origin: RectangleOrigin::TopLeft,
+                    extents: Vec2::new(world_bounds.width(), world_bounds.height()),
                 };
 
-                commands.entity(entity).insert(GeometryBuilder::build_as(
-                    &shape,
-                    ShapeColors::outlined(Color::RED, Color::BLACK),
-                    DrawMode::Outlined {
-                        fill_options: FillOptions::default(),
-                        outline_options: StrokeOptions::default().with_line_width(10.0),
-                    },
-                    Transform::default(),
-                ));
+                commands
+                    .entity(entity)
+                    .insert_bundle(GeometryBuilder::build_as(
+                        &shape,
+                        DrawMode::Outlined {
+                            fill_mode: FillMode::color(Color::RED),
+                            outline_mode: StrokeMode::new(Color::BLACK, 10.0),
+                        },
+                        Transform::default(),
+                    ));
             } else {
-                commands.entity(entity).remove::<ShapeBundle>();
+                commands.entity(entity).remove_bundle::<ShapeBundle>();
             }
         }
     }

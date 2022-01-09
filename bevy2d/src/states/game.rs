@@ -1,15 +1,13 @@
 //! Game state systems
 
 use bevy::prelude::*;
-use bevy_rapier2d::physics::RapierConfiguration;
-use bevy_rapier2d::rapier::dynamics::RigidBodyBuilder;
-use bevy_rapier2d::rapier::geometry::ColliderBuilder;
-use bevy_rapier2d::rapier::math::Vector;
+use bevy_rapier2d::prelude::*;
 
 use core_lib::components::camera::*;
 use core_lib::components::character::*;
 use core_lib::resources::input::*;
 
+use crate::components::game::*;
 use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::states::*;
@@ -64,7 +62,7 @@ pub fn teardown(mut commands: Commands) {
 }
 
 /// Setup the game world
-pub fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMaterial>>) {
+pub fn setup_world(mut commands: Commands) {
     let world_bounds = WorldBounds2D {
         min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
         max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
@@ -76,81 +74,149 @@ pub fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMat
     // ground
     commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.0, 1.0, 0.0).into()),
-            sprite: Sprite::new(Vec2::new(world_bounds.width(), 1.0)),
+            sprite: Sprite {
+                color: Color::GREEN,
+                custom_size: Some(Vec2::new(world_bounds.width(), 1.0)),
+                ..Default::default()
+            },
+            transform: Transform::from_translation(Vec3::new(0.0, world_bounds.min.y + 0.5, 0.0)),
             ..Default::default()
         })
-        .insert(RigidBodyBuilder::new_static().translation(0.0, world_bounds.min.y + 0.5))
-        .insert(
-            ColliderBuilder::cuboid(world_bounds.width() / 2.0, 0.5)
-                .collision_groups(*WORLD_COLLISION_GROUPS)
-                .friction(0.0)
-                .restitution(0.0),
-        );
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static.into(),
+            position: Vec2::new(0.0, world_bounds.min.y + 0.5).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(world_bounds.width() / 2.0, 0.5).into(),
+            material: ColliderMaterial::new(0.0, 0.0).into(),
+            flags: ColliderFlags {
+                collision_groups: *WORLD_COLLISION_GROUPS,
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        });
+    //.insert(ColliderDebugRender::with_id(2));
 
     // platforms
     commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(1.0, 1.0, 0.0).into()),
-            sprite: Sprite::new(Vec2::new(5.0, 1.0)),
+            sprite: Sprite {
+                color: Color::YELLOW,
+                custom_size: Some(Vec2::new(5.0, 1.0)),
+                ..Default::default()
+            },
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
             ..Default::default()
         })
-        .insert(RigidBodyBuilder::new_static().translation(0.0, 0.0))
-        .insert(
-            ColliderBuilder::cuboid(2.5, 0.5)
-                .collision_groups(*WORLD_COLLISION_GROUPS)
-                .friction(0.0)
-                .restitution(0.0),
-        );
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static.into(),
+            position: Vec2::new(0.0, 0.0).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(2.5, 0.5).into(),
+            material: ColliderMaterial::new(0.0, 0.0).into(),
+            flags: ColliderFlags {
+                collision_groups: *WORLD_COLLISION_GROUPS,
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        });
 
     commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.0, 1.0, 1.0).into()),
-            sprite: Sprite::new(Vec2::new(5.0, 1.0)),
+            sprite: Sprite {
+                color: Color::CYAN,
+                custom_size: Some(Vec2::new(5.0, 1.0)),
+                ..Default::default()
+            },
+            transform: Transform::from_translation(Vec3::new(-10.0, -5.0, 0.0)),
             ..Default::default()
         })
-        .insert(RigidBodyBuilder::new_static().translation(-10.0, -5.0))
-        .insert(
-            ColliderBuilder::cuboid(2.5, 0.5)
-                .collision_groups(*WORLD_COLLISION_GROUPS)
-                .friction(0.0)
-                .restitution(0.0),
-        );
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static.into(),
+            position: Vec2::new(-10.0, -5.0).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(2.5, 0.5).into(),
+            material: ColliderMaterial::new(0.0, 0.0).into(),
+            flags: ColliderFlags {
+                collision_groups: *WORLD_COLLISION_GROUPS,
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        });
 
     commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.0, 1.0, 1.0).into()),
-            sprite: Sprite::new(Vec2::new(5.0, 1.0)),
+            sprite: Sprite {
+                color: Color::CYAN,
+                custom_size: Some(Vec2::new(5.0, 1.0)),
+                ..Default::default()
+            },
+            transform: Transform::from_translation(Vec3::new(10.0, -5.0, 0.0)),
             ..Default::default()
         })
-        .insert(RigidBodyBuilder::new_static().translation(10.0, -5.0))
-        .insert(
-            ColliderBuilder::cuboid(2.5, 0.5)
-                .collision_groups(*WORLD_COLLISION_GROUPS)
-                .friction(0.0)
-                .restitution(0.0),
-        );
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static.into(),
+            position: Vec2::new(10.0, -5.0).into(),
+            ..Default::default()
+        })
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(2.5, 0.5).into(),
+            material: ColliderMaterial::new(0.0, 0.0).into(),
+            flags: ColliderFlags {
+                collision_groups: *WORLD_COLLISION_GROUPS,
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        });
 
     // player
     commands
         .spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-            sprite: Sprite::new(Vec2::new(1.0, 2.0)),
+            sprite: Sprite {
+                color: Color::BLUE,
+                custom_size: Some(Vec2::new(1.0, 2.0)),
+                ..Default::default()
+            },
             ..Default::default()
         })
-        .insert(
-            //RigidBodyBuilder::new_kinematic()
-            RigidBodyBuilder::new_dynamic()
-                .translation(world_bounds.min.x + 1.0, world_bounds.min.y + 2.0)
-                .additional_mass(CHARACTER_MASS)
-                .lock_rotations(),
-        )
-        .insert(
-            ColliderBuilder::cuboid(0.5, 1.0)
-                .collision_groups(*CHARACTER_COLLISION_GROUPS)
-                .friction(0.0)
-                .restitution(0.0),
-        )
+        .insert_bundle(RigidBodyBundle {
+            //body_type: RigidBodyType::KinematicPositionBased.into(),
+            body_type: RigidBodyType::Dynamic.into(),
+            position: Vec2::new(world_bounds.min.x + 1.0, world_bounds.min.y + 10.0).into(),
+            mass_properties: RigidBodyMassProps {
+                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
+                local_mprops: MassProperties {
+                    inv_mass: 1.0 / CHARACTER_MASS,
+                    // TODO: why is there no Default derived for this?
+                    inv_principal_inertia_sqrt: 0.0,
+                    local_com: Point::origin(),
+                },
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .insert_bundle(ColliderBundle {
+            shape: ColliderShape::cuboid(0.5, 1.0).into(),
+            material: ColliderMaterial::new(0.0, 0.0).into(),
+            flags: ColliderFlags {
+                collision_groups: *CHARACTER_COLLISION_GROUPS,
+                ..Default::default()
+            }
+            .into(),
+            ..Default::default()
+        })
+        //.insert(ColliderDebugRender::with_id(1))
         .insert(Character {
             speed: 10.0,
             air_control_factor: 1.0,
@@ -164,10 +230,6 @@ pub fn setup_world(mut commands: Commands, mut materials: ResMut<Assets<ColorMat
 pub fn teardown_world(mut commands: Commands) {
     commands.remove_resource::<WorldBounds2D>();
 }
-
-/// Timer text marker
-#[derive(Default)]
-pub struct TimerText;
 
 /// Setup the game UI
 pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {

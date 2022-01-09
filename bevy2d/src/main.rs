@@ -9,8 +9,7 @@ mod systems;
 use bevy::diagnostic::*;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
-use bevy_rapier2d::physics::RapierPhysicsPlugin;
-use bevy_rapier2d::rapier::geometry::InteractionGroups;
+use bevy_rapier2d::prelude::*;
 use once_cell::sync::Lazy;
 
 use core_lib::components::camera::*;
@@ -27,8 +26,8 @@ use systems::world::*;
 use systems::{pause, pause_input};
 
 // physics layers
-const WORLD_LAYER: u16 = 0b01;
-const CHARACTER_LAYER: u16 = 0b10;
+const WORLD_LAYER: u32 = 0b01;
+const CHARACTER_LAYER: u32 = 0b10;
 
 // physics collision groups
 static WORLD_COLLISION_GROUPS: Lazy<InteractionGroups> =
@@ -61,7 +60,7 @@ fn setup_debug(mut commands: Commands) {
 
 #[bevy_main]
 fn main() {
-    App::build()
+    App::new()
         .insert_resource(WindowDescriptor {
             title: "Bevy 2D".to_owned(),
             width: WINDOW_WIDTH,
@@ -77,8 +76,8 @@ fn main() {
         // plugins
         .add_plugins(DefaultPlugins)
         .add_plugin(ShapePlugin)
-        .add_plugin(RapierPhysicsPlugin)
-        //.add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         //.add_plugin(LogDiagnosticsPlugin::default())
         // events
@@ -89,79 +88,72 @@ fn main() {
         .add_state(GameState::Menu)
         .add_system_set(
             SystemSet::on_enter(GameState::Menu)
-                .with_system(states::menu::setup.system())
-                .with_system(states::menu::setup_ui.system()),
+                .with_system(states::menu::setup)
+                .with_system(states::menu::setup_ui),
         )
-        .add_system_set(
-            SystemSet::on_update(GameState::Menu).with_system(states::menu::on_update.system()),
-        )
+        .add_system_set(SystemSet::on_update(GameState::Menu).with_system(states::menu::on_update))
         .add_system_set(
             SystemSet::on_exit(GameState::Menu)
-                .with_system(states::menu::teardown_ui.system())
-                .with_system(states::menu::teardown.system())
-                .with_system(core_lib::states::teardown.system()),
+                .with_system(states::menu::teardown_ui)
+                .with_system(states::menu::teardown)
+                .with_system(core_lib::states::teardown),
         )
         .add_system_set(
             SystemSet::on_enter(GameState::Game)
-                .with_system(states::game::setup.system())
-                .with_system(states::game::setup_world.system())
-                .with_system(states::game::setup_ui.system()),
+                .with_system(states::game::setup)
+                .with_system(states::game::setup_world)
+                .with_system(states::game::setup_ui),
         )
         .add_system_set(
             SystemSet::on_update(GameState::Game)
-                .with_system(states::game::on_update.system())
-                .with_system(states::game::update_ui.system())
+                .with_system(states::game::on_update)
+                .with_system(states::game::update_ui)
                 // input
-                .with_system(pause_input.system().label("pause_input"))
-                .with_system(pause.system().label("pause").after("pause_input"))
-                .with_system(
-                    platformer_2d_keyboard_input
-                        .system()
-                        .label("character_input"),
-                )
-                .with_system(character_movement.system().after("character_input"))
-                .with_system(jump_input.system().label("character_jump_input"))
-                .with_system(character_jump.system().after("character_jump_input"))
+                .with_system(pause_input.label("pause_input"))
+                .with_system(pause.label("pause").after("pause_input"))
+                .with_system(platformer_2d_keyboard_input.label("character_input"))
+                .with_system(character_movement.after("character_input"))
+                .with_system(jump_input.label("character_jump_input"))
+                .with_system(character_jump.after("character_jump_input"))
                 // physics
-                .with_system(character_grounded_system.system())
-                .with_system(character_gravity_multiplier.system())
-                .with_system(character_pause.system().after("pause"))
+                .with_system(character_grounded_system)
+                .with_system(character_gravity_multiplier)
+                .with_system(character_pause.after("pause"))
                 // debug
-                .with_system(world_bounds_toggle_debug_system.system()),
+                .with_system(world_bounds_toggle_debug_system),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::Game)
-                .with_system(states::game::teardown_ui.system())
-                .with_system(states::game::teardown_world.system())
-                .with_system(states::game::teardown.system())
-                .with_system(core_lib::states::teardown.system()),
+                .with_system(states::game::teardown_ui)
+                .with_system(states::game::teardown_world)
+                .with_system(states::game::teardown)
+                .with_system(core_lib::states::teardown),
         )
         .add_system_set(
             SystemSet::on_enter(GameState::GameOver)
-                .with_system(states::gameover::setup.system())
-                .with_system(states::gameover::setup_ui.system()),
+                .with_system(states::gameover::setup)
+                .with_system(states::gameover::setup_ui),
         )
         .add_system_set(
-            SystemSet::on_update(GameState::GameOver)
-                .with_system(states::gameover::on_update.system()),
+            SystemSet::on_update(GameState::GameOver).with_system(states::gameover::on_update),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::GameOver)
-                .with_system(states::gameover::teardown_ui.system())
-                .with_system(states::gameover::teardown.system())
+                .with_system(states::gameover::teardown_ui)
+                .with_system(states::gameover::teardown)
                 // TODO: this is gross but it's the best "complete" cleanup from the game over sub-state
-                .with_system(core_lib::states::teardown.system()),
+                .with_system(core_lib::states::teardown),
         )
         // setup
-        .add_startup_system(setup.system())
-        .add_startup_system(setup_debug.system())
+        .add_startup_system(setup)
+        .add_startup_system(setup_debug)
         // add internal camera system update
         .add_system_to_stage(
             bevy::app::CoreStage::PostUpdate,
-            bevy::render::camera::camera_system::<OrthoProjection>.system(),
+            bevy::render::camera::camera_system::<OrthoProjection>,
         )
         // debug
-        .add_system(debug_system.system())
-        .add_system(fps_text_system.system())
+        .add_system(debug_system)
+        .add_system(fps_text_system)
         .run();
 }

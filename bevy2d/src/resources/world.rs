@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 
 /// World bounding box
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Component)]
 pub struct WorldBounds2D {
     /// The bottom left of the world
     pub min: Vec2,
@@ -14,13 +14,11 @@ pub struct WorldBounds2D {
 
 impl WorldBounds2D {
     /// Returns the width of the world
-    #[allow(dead_code)]
     pub fn width(&self) -> f32 {
         self.max.x - self.min.x
     }
 
     /// Returns the height of the world
-    #[allow(dead_code)]
     pub fn height(&self) -> f32 {
         self.max.y - self.min.y
     }

@@ -1,7 +1,6 @@
 //! Game state utils
 
 use bevy::prelude::*;
-use bevy::render::camera::Camera;
 
 /// Despawn all entities
 pub fn teardown(mut commands: Commands, entities: Query<Entity>) {

@@ -1,6 +1,6 @@
 //! Game state resources
 
-use bevy_rapier2d::rapier::math::Vector;
+use bevy_rapier2d::prelude::*;
 
 /// Holds the main game state
 #[derive(Default)]

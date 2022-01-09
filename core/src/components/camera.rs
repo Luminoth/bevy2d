@@ -5,13 +5,12 @@
 //! updated to use an "orthographic size" like Unity's orthographic camera
 
 use bevy::prelude::*;
-use bevy::render::camera::{
-    Camera, CameraProjection, DepthCalculation, VisibleEntities, WindowOrigin,
-};
+use bevy::render::camera::{CameraProjection, DepthCalculation, WindowOrigin};
+use bevy::render::view::VisibleEntities;
 use derivative::Derivative;
 
 /// Orthographic camera projection
-#[derive(Derivative, Debug)]
+#[derive(Derivative, Debug, Component)]
 #[derivative(Default)]
 pub struct OrthoProjection {
     left: f32,
@@ -67,6 +66,10 @@ impl CameraProjection for OrthoProjection {
     fn depth_calculation(&self) -> DepthCalculation {
         DepthCalculation::ZDifference
     }
+
+    fn far(&self) -> f32 {
+        self.far
+    }
 }
 
 /// Orthographic camera component bundle
@@ -88,7 +91,7 @@ impl CameraOrtho2dBundle {
             camera: Camera {
                 // have to use one of the internal magic constants
                 // since bevy relies on them internally for rendering
-                name: Some(bevy::render::render_graph::base::camera::CAMERA_2D.to_owned()),
+                name: Some(bevy::render::camera::CameraPlugin::CAMERA_2D.to_owned()),
                 ..Default::default()
             },
             orthographic_projection: OrthoProjection {

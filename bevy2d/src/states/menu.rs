@@ -3,7 +3,6 @@
 use bevy::prelude::*;
 
 use core_lib::components::camera::*;
-use core_lib::resources::button::*;
 
 use crate::CAMERA_SIZE;
 
@@ -27,17 +26,7 @@ pub fn teardown(mut commands: Commands) {
 }
 
 /// Setup the menu UI
-pub fn setup_ui(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    let button_materials = ButtonMaterials {
-        normal: materials.add(Color::rgb(0.15, 0.15, 0.15).into()),
-        hovered: materials.add(Color::rgb(0.25, 0.25, 0.25).into()),
-        pressed: materials.add(Color::rgb(0.35, 0.75, 0.35).into()),
-    };
-
+pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle(NodeBundle {
             style: Style {
@@ -45,7 +34,7 @@ pub fn setup_ui(
                 justify_content: JustifyContent::SpaceBetween,
                 ..Default::default()
             },
-            material: materials.add(Color::NONE.into()),
+            color: Color::NONE.into(),
             ..Default::default()
         })
         .with_children(|parent| {
@@ -58,7 +47,7 @@ pub fn setup_ui(
                         align_items: AlignItems::Center,
                         ..Default::default()
                     },
-                    material: button_materials.normal.clone(),
+                    color: Color::rgb(0.15, 0.15, 0.15).into(),
                     ..Default::default()
                 })
                 .with_children(|parent| {
@@ -77,36 +66,29 @@ pub fn setup_ui(
                 });
         });
 
-    commands.insert_resource(button_materials);
-
     commands.spawn_bundle(UiCameraBundle::default());
 }
 
 /// Tear down the menu UI
-pub fn teardown_ui(mut commands: Commands) {
-    commands.remove_resource::<ButtonMaterials>();
-}
+pub fn teardown_ui(mut _commands: Commands) {}
 
 /// Menu update
+#[allow(clippy::type_complexity)]
 pub fn on_update(
-    button_materials: Res<ButtonMaterials>,
-    mut query: Query<
-        (&Interaction, &mut Handle<ColorMaterial>),
-        (Changed<Interaction>, With<Button>),
-    >,
+    mut query: Query<(&Interaction, &mut UiColor), (Changed<Interaction>, With<Button>)>,
     mut state: ResMut<State<GameState>>,
 ) {
-    for (interaction, mut material) in query.iter_mut() {
+    for (interaction, mut color) in query.iter_mut() {
         match *interaction {
             Interaction::Clicked => {
-                *material = button_materials.pressed.clone();
+                *color = Color::rgb(0.35, 0.75, 0.35).into();
                 state.set(GameState::Game).unwrap();
             }
             Interaction::Hovered => {
-                *material = button_materials.hovered.clone();
+                *color = Color::rgb(0.25, 0.25, 0.25).into();
             }
             Interaction::None => {
-                *material = button_materials.normal.clone();
+                *color = Color::rgb(0.15, 0.15, 0.15).into();
             }
         }
     }

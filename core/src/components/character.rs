@@ -1,9 +1,10 @@
 //! Character... ? components
 
-use bevy_rapier2d::rapier::math::Vector;
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 /// A... character? I dunno
-#[derive(Default)]
+#[derive(Default, Component)]
 pub struct Character {
     /// How fast the character moves (physics independent)
     pub speed: f32,
@@ -19,9 +20,9 @@ pub struct Character {
 }
 
 /// A... player character? sure
-#[derive(Default)]
+#[derive(Default, Component)]
 pub struct PlayerCharacter {}
 
 /// A... non-player character? probably
-#[derive(Default)]
+#[derive(Default, Component)]
 pub struct NonPlayerCharacter {}

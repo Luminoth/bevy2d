@@ -65,7 +65,7 @@ pub fn character_jump(
     for _ in event_reader.iter() {
         for (character, mut rb_vel, rb_mass) in query.iter_mut() {
             if character.grounded {
-                rb_vel.apply_impulse(rb_mass, character.jump_force)
+                rb_vel.apply_impulse(rb_mass, character.jump_force.into())
             }
         }
     }

@@ -2,7 +2,6 @@
 
 pub mod camera;
 pub mod character;
-pub mod debug;
 
 use bevy::prelude::*;
 

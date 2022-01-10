@@ -7,10 +7,11 @@
 use bevy::prelude::*;
 use bevy::render::camera::{CameraProjection, DepthCalculation, WindowOrigin};
 use bevy::render::view::VisibleEntities;
+use bevy_inspector_egui::Inspectable;
 use derivative::Derivative;
 
 /// Orthographic camera projection
-#[derive(Derivative, Debug, Component)]
+#[derive(Derivative, Debug, Component, Inspectable)]
 #[derivative(Default)]
 pub struct OrthoProjection {
     left: f32,

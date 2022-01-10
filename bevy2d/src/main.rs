@@ -8,22 +8,24 @@ mod systems;
 
 use bevy::diagnostic::*;
 use bevy::prelude::*;
-use bevy_inspector_egui::{WorldInspectorParams, WorldInspectorPlugin};
+use bevy_egui::{EguiPlugin, EguiSettings};
+use bevy_inspector_egui::{RegisterInspectable, WorldInspectorParams, WorldInspectorPlugin};
 use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::*;
 use once_cell::sync::Lazy;
 
 use core_lib::components::camera::*;
+use core_lib::components::character::*;
 use core_lib::events::debug::*;
 use core_lib::resources::debug::*;
 use core_lib::systems::input::*;
 
+use components::game::*;
 use events::character::*;
 use events::PauseEvent;
 use states::*;
 use systems::character::*;
 use systems::debug::*;
-use systems::world::*;
 use systems::{pause, pause_input};
 
 // physics layers
@@ -81,12 +83,20 @@ fn main() {
         .add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         //.add_plugin(LogDiagnosticsPlugin::default())
+        .insert_resource(EguiSettings { scale_factor: 0.8 })
+        .add_plugin(EguiPlugin)
+        // inspector
         .insert_resource(WorldInspectorParams {
             enabled: false,
             despawnable_entities: true,
             ..Default::default()
         })
         .add_plugin(WorldInspectorPlugin::new())
+        .register_inspectable::<OrthoProjection>()
+        .register_inspectable::<TimerText>()
+        .register_inspectable::<Character>()
+        .register_inspectable::<PlayerCharacter>()
+        .register_inspectable::<NonPlayerCharacter>()
         // events
         .add_event::<ToggleDebugEvent>()
         .add_event::<PauseEvent>()
@@ -125,9 +135,7 @@ fn main() {
                 // physics
                 .with_system(character_grounded_system)
                 .with_system(character_gravity_multiplier)
-                .with_system(character_pause.after("pause"))
-                // debug
-                .with_system(world_bounds_toggle_debug_system),
+                .with_system(character_pause.after("pause")),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::Game)

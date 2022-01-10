@@ -101,8 +101,9 @@ pub fn setup_world(mut commands: Commands) {
             }
             .into(),
             ..Default::default()
-        });
-    //.insert(ColliderDebugRender::with_id(2));
+        })
+        //.insert(ColliderDebugRender::with_id(2))
+        .insert(Name::new("Ground"));
 
     // platforms
     commands
@@ -134,7 +135,8 @@ pub fn setup_world(mut commands: Commands) {
             }
             .into(),
             ..Default::default()
-        });
+        })
+        .insert(Name::new("Platform"));
 
     commands
         .spawn_bundle(SpriteBundle {
@@ -165,7 +167,8 @@ pub fn setup_world(mut commands: Commands) {
             }
             .into(),
             ..Default::default()
-        });
+        })
+        .insert(Name::new("Platform"));
 
     commands
         .spawn_bundle(SpriteBundle {
@@ -196,7 +199,8 @@ pub fn setup_world(mut commands: Commands) {
             }
             .into(),
             ..Default::default()
-        });
+        })
+        .insert(Name::new("Platform"));
 
     // player
     commands
@@ -239,10 +243,11 @@ pub fn setup_world(mut commands: Commands) {
         .insert(Character {
             speed: 10.0,
             air_control_factor: 1.0,
-            jump_force: Vector::y() * CHARACTER_JUMP_FORCE,
+            jump_force: Vec2::Y * CHARACTER_JUMP_FORCE,
             ..Default::default()
         })
-        .insert(PlayerCharacter::default());
+        .insert(PlayerCharacter::default())
+        .insert(Name::new("Player"));
 }
 
 /// Tear down the game world

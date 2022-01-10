@@ -4,7 +4,6 @@ use bevy::prelude::*;
 
 pub mod character;
 pub mod debug;
-pub mod world;
 
 use crate::events::PauseEvent;
 use crate::states::game::Game;

@@ -79,14 +79,19 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(world_bounds.width(), 1.0)),
                 ..Default::default()
             },
-            transform: Transform::from_translation(Vec3::new(0.0, world_bounds.min.y + 0.5, 0.0)),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
-            position: Vec2::new(0.0, world_bounds.min.y + 0.5).into(),
+            position: Vec3::new(0.0, world_bounds.min.y + 0.5, 0.0).into(),
+            mass_properties: RigidBodyMassProps {
+                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
+                ..Default::default()
+            }
+            .into(),
             ..Default::default()
         })
+        .insert(RigidBodyPositionSync::Discrete)
         .insert_bundle(ColliderBundle {
             shape: ColliderShape::cuboid(world_bounds.width() / 2.0, 0.5).into(),
             material: ColliderMaterial::new(0.0, 0.0).into(),
@@ -107,14 +112,19 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(5.0, 1.0)),
                 ..Default::default()
             },
-            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
             position: Vec2::new(0.0, 0.0).into(),
+            mass_properties: RigidBodyMassProps {
+                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
+                ..Default::default()
+            }
+            .into(),
             ..Default::default()
         })
+        .insert(RigidBodyPositionSync::Discrete)
         .insert_bundle(ColliderBundle {
             shape: ColliderShape::cuboid(2.5, 0.5).into(),
             material: ColliderMaterial::new(0.0, 0.0).into(),
@@ -133,14 +143,19 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(5.0, 1.0)),
                 ..Default::default()
             },
-            transform: Transform::from_translation(Vec3::new(-10.0, -5.0, 0.0)),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
             position: Vec2::new(-10.0, -5.0).into(),
+            mass_properties: RigidBodyMassProps {
+                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
+                ..Default::default()
+            }
+            .into(),
             ..Default::default()
         })
+        .insert(RigidBodyPositionSync::Discrete)
         .insert_bundle(ColliderBundle {
             shape: ColliderShape::cuboid(2.5, 0.5).into(),
             material: ColliderMaterial::new(0.0, 0.0).into(),
@@ -159,14 +174,19 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(5.0, 1.0)),
                 ..Default::default()
             },
-            transform: Transform::from_translation(Vec3::new(10.0, -5.0, 0.0)),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
             position: Vec2::new(10.0, -5.0).into(),
+            mass_properties: RigidBodyMassProps {
+                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
+                ..Default::default()
+            }
+            .into(),
             ..Default::default()
         })
+        .insert(RigidBodyPositionSync::Discrete)
         .insert_bundle(ColliderBundle {
             shape: ColliderShape::cuboid(2.5, 0.5).into(),
             material: ColliderMaterial::new(0.0, 0.0).into(),
@@ -196,7 +216,6 @@ pub fn setup_world(mut commands: Commands) {
                 flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
                 local_mprops: MassProperties {
                     inv_mass: 1.0 / CHARACTER_MASS,
-                    // TODO: why is there no Default derived for this?
                     inv_principal_inertia_sqrt: 0.0,
                     local_com: Point::origin(),
                 },

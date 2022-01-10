@@ -83,7 +83,7 @@ pub fn setup_world(mut commands: Commands) {
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static.into(),
-            position: Vec3::new(0.0, world_bounds.min.y + 0.5, 0.0).into(),
+            position: Vec2::new(0.0, world_bounds.min.y + 0.5).into(),
             mass_properties: RigidBodyMassProps {
                 flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
                 ..Default::default()

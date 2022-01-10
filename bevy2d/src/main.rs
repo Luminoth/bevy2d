@@ -8,6 +8,7 @@ mod systems;
 
 use bevy::diagnostic::*;
 use bevy::prelude::*;
+use bevy_inspector_egui::{WorldInspectorParams, WorldInspectorPlugin};
 use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::*;
 use once_cell::sync::Lazy;
@@ -80,6 +81,12 @@ fn main() {
         .add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         //.add_plugin(LogDiagnosticsPlugin::default())
+        .insert_resource(WorldInspectorParams {
+            enabled: false,
+            despawnable_entities: true,
+            ..Default::default()
+        })
+        .add_plugin(WorldInspectorPlugin::new())
         // events
         .add_event::<ToggleDebugEvent>()
         .add_event::<PauseEvent>()
@@ -154,6 +161,6 @@ fn main() {
         )
         // debug
         .add_system(debug_system)
-        .add_system(fps_text_system)
+        .add_system(debug_ui)
         .run();
 }

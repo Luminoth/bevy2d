@@ -2,8 +2,9 @@
 
 use bevy::diagnostic::*;
 use bevy::prelude::*;
+use bevy_egui::{egui, EguiContext};
+use bevy_inspector_egui::WorldInspectorParams;
 
-use core_lib::components::debug::*;
 use core_lib::events::debug::*;
 use core_lib::resources::debug::*;
 
@@ -11,77 +12,70 @@ use core_lib::resources::debug::*;
 ///
 /// Sends the ToggleDebugEvent
 pub fn debug_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    mut inspector: ResMut<WorldInspectorParams>,
     mut debug_state: ResMut<DebugState>,
     keyboard_input: Res<Input<KeyCode>>,
     mut debug_events: EventWriter<ToggleDebugEvent>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::D) {
+    if keyboard_input.just_pressed(KeyCode::Grave) {
         debug!("toggling debug ...");
 
         debug_state.enabled = !debug_state.enabled;
 
-        if debug_state.enabled {
-            debug_state.fps_text_entity = Some(
-                commands
-                    .spawn_bundle(TextBundle {
-                        style: Style {
-                            align_self: AlignSelf::FlexEnd,
-                            position_type: PositionType::Absolute,
-                            position: Rect {
-                                top: Val::Px(5.0),
-                                left: Val::Px(15.0),
-                                ..Default::default()
-                            },
-                            ..Default::default()
-                        },
-                        text: Text::with_section(
-                            "fps",
-                            TextStyle {
-                                font: asset_server.load("fonts/Roboto-Regular.ttf"),
-                                font_size: 30.0,
-                                color: Color::WHITE,
-                            },
-                            TextAlignment::default(),
-                        ),
-                        ..Default::default()
-                    })
-                    .insert(FpsText)
-                    .id(),
-            );
-        } else {
-            if let Some(fps_text) = debug_state.fps_text_entity.take() {
-                commands.entity(fps_text).despawn_recursive();
-            }
+        if !debug_state.enabled {
+            inspector.enabled = false;
         }
 
         debug_events.send(ToggleDebugEvent);
     }
 }
 
-/// Handles FPS text
-pub fn fps_text_system(
+fn fps(diagnostics: &Diagnostics, dt: f64) -> (f64, f64) {
+    let mut fps = 0.0;
+    if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
+        if let Some(fps_avg) = fps_diagnostic.average() {
+            fps = fps_avg;
+        }
+    }
+
+    let mut frame_time = dt;
+    if let Some(frame_time_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FRAME_TIME) {
+        if let Some(frame_time_avg) = frame_time_diagnostic.average() {
+            frame_time = frame_time_avg;
+        }
+    }
+
+    (fps, frame_time)
+}
+
+/// Handles the debug UI
+pub fn debug_ui(
+    debug_state: ResMut<DebugState>,
+    context: ResMut<EguiContext>,
+    mut inspector: ResMut<WorldInspectorParams>,
     time: Res<Time>,
     diagnostics: Res<Diagnostics>,
-    mut query: Query<&mut Text, With<FpsText>>,
 ) {
-    for mut text in query.iter_mut() {
-        let mut fps = 0.0;
-        if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
-            if let Some(fps_avg) = fps_diagnostic.average() {
-                fps = fps_avg;
-            }
-        }
-
-        let mut frame_time = time.delta().as_secs_f64();
-        if let Some(frame_time_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FRAME_TIME)
-        {
-            if let Some(frame_time_avg) = frame_time_diagnostic.average() {
-                frame_time = frame_time_avg;
-            }
-        }
-
-        text.sections[0].value = format!("{:.1} fps, {:.3} ms/frame", fps, frame_time * 1000.0);
+    if !debug_state.enabled {
+        return;
     }
+
+    let (fps, frame_time) = fps(&diagnostics, time.delta_seconds_f64());
+
+    egui::Window::new("Debug").show(context.ctx(), |ui| {
+        ui.vertical(|ui| {
+            ui.label(format!(
+                "{:.1} fps, {:.3} ms/frame",
+                fps,
+                frame_time * 1000.0
+            ));
+
+            if ui.button("Inspector").clicked() {
+                inspector.enabled = !inspector.enabled;
+            }
+
+            // TODO: buttons to spawn creatures would be cool
+            // but we need a way to say *where* to spawn them I think?
+        });
+    });
 }

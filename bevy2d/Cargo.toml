@@ -8,9 +8,9 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.6"
-bevy_egui = "0.10"
-#bevy-inspector-egui = { version = "0.7", features = [ "rapier2d" ] }
-bevy-inspector-egui = "0.7"
+bevy_egui = "0.11"
+bevy-inspector-egui = "0.8"
+# TODO: bevy-inspector-egui-rapier
 bevy_prototype_lyon = "0.4"
 bevy_rapier2d = { version = "0.12", features = [ "simd-stable", "parallel", "serde-serialize", "render" ] }
 once_cell = "1.9"

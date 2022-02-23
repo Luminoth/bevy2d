@@ -50,8 +50,8 @@ fn fps(diagnostics: &Diagnostics, dt: f64) -> (f64, f64) {
 
 /// Handles the debug UI
 pub fn debug_ui(
-    debug_state: ResMut<DebugState>,
-    context: ResMut<EguiContext>,
+    debug_state: Res<DebugState>,
+    mut context: ResMut<EguiContext>,
     mut inspector: ResMut<WorldInspectorParams>,
     time: Res<Time>,
     diagnostics: Res<Diagnostics>,
@@ -62,7 +62,7 @@ pub fn debug_ui(
 
     let (fps, frame_time) = fps(&diagnostics, time.delta_seconds_f64());
 
-    egui::Window::new("Debug").show(context.ctx(), |ui| {
+    egui::Window::new("Debug").show(context.ctx_mut(), |ui| {
         ui.vertical(|ui| {
             ui.label(format!(
                 "{:.1} fps, {:.3} ms/frame",

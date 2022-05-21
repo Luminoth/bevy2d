@@ -8,11 +8,12 @@ mod systems;
 
 use bevy::diagnostic::*;
 use bevy::prelude::*;
+use bevy::window::PresentMode;
 use bevy_egui::{EguiPlugin, EguiSettings};
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorParams, WorldInspectorPlugin};
+use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::*;
-use once_cell::sync::Lazy;
 
 use core_lib::components::camera::*;
 use core_lib::components::character::*;
@@ -31,12 +32,6 @@ use systems::{pause, pause_input};
 // physics layers
 const WORLD_LAYER: u32 = 0b01;
 const CHARACTER_LAYER: u32 = 0b10;
-
-// physics collision groups
-static WORLD_COLLISION_GROUPS: Lazy<InteractionGroups> =
-    Lazy::new(|| InteractionGroups::new(WORLD_LAYER, CHARACTER_LAYER));
-static CHARACTER_COLLISION_GROUPS: Lazy<InteractionGroups> =
-    Lazy::new(|| InteractionGroups::new(CHARACTER_LAYER, WORLD_LAYER));
 
 const GRAVITY: f32 = -9.81;
 
@@ -68,7 +63,7 @@ fn main() {
             title: "Bevy 2D".to_owned(),
             width: WINDOW_WIDTH,
             height: WINDOW_HEIGHT,
-            vsync: false,
+            present_mode: PresentMode::Immediate,
             resizable: false,
             ..Default::default()
         })
@@ -79,11 +74,17 @@ fn main() {
         // plugins
         .add_plugins(DefaultPlugins)
         .add_plugin(ShapePlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(bevy_rapier2d::render::RapierRenderPlugin)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
+            CAMERA_SIZE * 100.0,
+        ))
+        .add_plugin(RapierDebugRenderPlugin::default())
+        .add_plugin(InspectableRapierPlugin)
         .add_plugin(FrameTimeDiagnosticsPlugin)
         //.add_plugin(LogDiagnosticsPlugin::default())
-        .insert_resource(EguiSettings { scale_factor: 0.8 })
+        .insert_resource(EguiSettings {
+            scale_factor: 0.8,
+            ..Default::default()
+        })
         .add_plugin(EguiPlugin)
         // inspector
         .insert_resource(WorldInspectorParams {
@@ -126,16 +127,20 @@ fn main() {
                 .with_system(states::game::on_update)
                 .with_system(states::game::update_ui)
                 // input
-                .with_system(pause_input.label("pause_input"))
-                .with_system(pause.label("pause").after("pause_input"))
-                .with_system(platformer_2d_keyboard_input.label("character_input"))
-                .with_system(character_movement.after("character_input"))
-                .with_system(jump_input.label("character_jump_input"))
-                .with_system(character_jump.after("character_jump_input"))
+                .with_system(pause_input.label(systems::Systems::PauseInput))
+                .with_system(
+                    pause
+                        .label(systems::Systems::Pause)
+                        .after(systems::Systems::PauseInput),
+                )
+                .with_system(platformer_2d_keyboard_input.label(systems::Systems::CharacterInput))
+                .with_system(character_movement.after(systems::Systems::CharacterInput))
+                .with_system(jump_input.label(systems::Systems::CharacterJumpInput))
+                .with_system(character_jump.after(systems::Systems::CharacterJumpInput))
                 // physics
                 .with_system(character_grounded_system)
                 .with_system(character_gravity_multiplier)
-                .with_system(character_pause.after("pause")),
+                .with_system(character_pause.after(systems::Systems::Pause)),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::Game)

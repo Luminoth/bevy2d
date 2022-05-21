@@ -6,5 +6,5 @@ use bevy_rapier2d::prelude::*;
 #[derive(Default)]
 pub struct GameConfig {
     /// Added gravity bonus for characters
-    pub character_gravity: Vector<f32>,
+    pub character_gravity: Vect,
 }

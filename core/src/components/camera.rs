@@ -5,7 +5,7 @@
 //! updated to use an "orthographic size" like Unity's orthographic camera
 
 use bevy::prelude::*;
-use bevy::render::camera::{CameraProjection, DepthCalculation, WindowOrigin};
+use bevy::render::camera::{Camera2d, CameraProjection, DepthCalculation, WindowOrigin};
 use bevy::render::view::VisibleEntities;
 use bevy_inspector_egui::Inspectable;
 use derivative::Derivative;
@@ -81,6 +81,7 @@ pub struct CameraOrtho2dBundle {
     pub visible_entities: VisibleEntities,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
+    pub marker: Camera2d,
 }
 
 impl CameraOrtho2dBundle {
@@ -89,12 +90,7 @@ impl CameraOrtho2dBundle {
         // the camera's translation by far and use a right handed coordinate system
         let far = 1000.0;
         Self {
-            camera: Camera {
-                // have to use one of the internal magic constants
-                // since bevy relies on them internally for rendering
-                name: Some(bevy::render::camera::CameraPlugin::CAMERA_2D.to_owned()),
-                ..Default::default()
-            },
+            camera: Camera::default(),
             orthographic_projection: OrthoProjection {
                 size,
                 far,
@@ -103,6 +99,7 @@ impl CameraOrtho2dBundle {
             visible_entities: Default::default(),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, far - 0.1)),
             global_transform: Default::default(),
+            marker: Camera2d,
         }
     }
 

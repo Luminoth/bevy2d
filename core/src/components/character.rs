@@ -21,8 +21,8 @@ pub struct Character {
 
 /// A... player character? sure
 #[derive(Default, Component, Inspectable)]
-pub struct PlayerCharacter {}
+pub struct PlayerCharacter;
 
 /// A... non-player character? probably
 #[derive(Default, Component, Inspectable)]
-pub struct NonPlayerCharacter {}
+pub struct NonPlayerCharacter;

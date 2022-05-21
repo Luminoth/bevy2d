@@ -1,6 +1,7 @@
 //! Menu state systems
 
 use bevy::prelude::*;
+//use bevy::render::camera::*;
 
 use core_lib::components::camera::*;
 
@@ -13,11 +14,13 @@ pub fn setup(mut commands: Commands) {
     info!("camera size: {}", CAMERA_SIZE);
 
     // cameras
+    let camera = CameraOrtho2dBundle::new(CAMERA_SIZE);
+    /*let mut camera = OrthographicCameraBundle::new_2d();
+    camera.orthographic_projection.scale = CAMERA_SIZE;
+    camera.orthographic_projection.scaling_mode = ScalingMode::FixedHorizontal;*/
+
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
-    commands
-        //.spawn_bundle(OrthographicCameraBundle::new_2d());
-        .spawn_bundle(CameraOrtho2dBundle::new(CAMERA_SIZE));
-    //.spawn_bundle(CameraOrtho2dBundle::new_2d());
+    commands.spawn_bundle(camera);
 }
 
 /// Menu teardown

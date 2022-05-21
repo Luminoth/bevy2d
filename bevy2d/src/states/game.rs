@@ -1,6 +1,7 @@
 //! Game state systems
 
 use bevy::prelude::*;
+//use bevy::render::camera::*;
 use bevy_rapier2d::prelude::*;
 
 use core_lib::components::camera::*;
@@ -12,8 +13,8 @@ use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::states::*;
 use crate::{
-    ASPECT_RATIO, CAMERA_SIZE, CHARACTER_COLLISION_GROUPS, CHARACTER_GRAVITY, CHARACTER_JUMP_FORCE,
-    CHARACTER_MASS, GRAVITY, WORLD_COLLISION_GROUPS,
+    ASPECT_RATIO, CAMERA_SIZE, CHARACTER_GRAVITY, CHARACTER_JUMP_FORCE, CHARACTER_LAYER,
+    CHARACTER_MASS, GRAVITY, WORLD_LAYER,
 };
 
 /// Main game state
@@ -29,22 +30,24 @@ pub fn setup(mut commands: Commands) {
     info!("camera size: {}", CAMERA_SIZE);
 
     // cameras
+    let camera = CameraOrtho2dBundle::new(CAMERA_SIZE);
+    /*let mut camera = OrthographicCameraBundle::new_2d();
+    camera.orthographic_projection.scale = CAMERA_SIZE;
+    camera.orthographic_projection.scaling_mode = ScalingMode::FixedHorizontal;*/
+
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
-    commands
-        //.spawn_bundle(OrthographicCameraBundle::new_2d());
-        .spawn_bundle(CameraOrtho2dBundle::new(CAMERA_SIZE));
-    //.spawn_bundle(CameraOrtho2dBundle::new_2d());
+    commands.spawn_bundle(camera);
 
     // physics
     commands.insert_resource(RapierConfiguration {
-        gravity: Vector::y() * GRAVITY,
+        gravity: Vec2::Y * GRAVITY,
         ..Default::default()
     });
 
     // game state
     commands.insert_resource(CharacterInput2D::default());
     commands.insert_resource(GameConfig {
-        character_gravity: Vector::y() * CHARACTER_GRAVITY,
+        character_gravity: Vec2::Y * CHARACTER_GRAVITY,
     });
     commands.insert_resource(Game {
         timer: Timer::from_seconds(30.0, false),
@@ -79,30 +82,17 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(world_bounds.width(), 1.0)),
                 ..Default::default()
             },
+            transform: Transform::from_translation(Vec3::new(0.0, world_bounds.min.y + 0.5, 0.0)),
             ..Default::default()
         })
-        .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static.into(),
-            position: Vec2::new(0.0, world_bounds.min.y + 0.5).into(),
-            mass_properties: RigidBodyMassProps {
-                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        .insert(RigidBodyPositionSync::Discrete)
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(world_bounds.width() / 2.0, 0.5).into(),
-            material: ColliderMaterial::new(0.0, 0.0).into(),
-            flags: ColliderFlags {
-                collision_groups: *WORLD_COLLISION_GROUPS,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        //.insert(ColliderDebugRender::with_id(2))
+        // rigidbody
+        .insert(RigidBody::Fixed)
+        .insert(LockedAxes::ROTATION_LOCKED)
+        //.insert(RigidBodyPositionSync::Discrete)
+        // collider
+        .insert(Collider::cuboid(world_bounds.width() / 2.0, 0.5))
+        //.insert(ColliderMaterial::new(0.0, 0.0))
+        .insert(CollisionGroups::new(WORLD_LAYER, CHARACTER_LAYER))
         .insert(Name::new("Ground"));
 
     // platforms
@@ -113,29 +103,17 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(5.0, 1.0)),
                 ..Default::default()
             },
+            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
             ..Default::default()
         })
-        .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static.into(),
-            position: Vec2::new(0.0, 0.0).into(),
-            mass_properties: RigidBodyMassProps {
-                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        .insert(RigidBodyPositionSync::Discrete)
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(2.5, 0.5).into(),
-            material: ColliderMaterial::new(0.0, 0.0).into(),
-            flags: ColliderFlags {
-                collision_groups: *WORLD_COLLISION_GROUPS,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
+        // rigidbody
+        .insert(RigidBody::Fixed)
+        .insert(LockedAxes::ROTATION_LOCKED)
+        //.insert(RigidBodyPositionSync::Discrete)
+        // collider
+        .insert(Collider::cuboid(2.5, 0.5))
+        //.insert(ColliderMaterial::new(0.0, 0.0))
+        .insert(CollisionGroups::new(WORLD_LAYER, CHARACTER_LAYER))
         .insert(Name::new("Platform"));
 
     commands
@@ -145,29 +123,17 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(5.0, 1.0)),
                 ..Default::default()
             },
+            transform: Transform::from_translation(Vec3::new(-10.0, -5.0, 0.0)),
             ..Default::default()
         })
-        .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static.into(),
-            position: Vec2::new(-10.0, -5.0).into(),
-            mass_properties: RigidBodyMassProps {
-                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        .insert(RigidBodyPositionSync::Discrete)
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(2.5, 0.5).into(),
-            material: ColliderMaterial::new(0.0, 0.0).into(),
-            flags: ColliderFlags {
-                collision_groups: *WORLD_COLLISION_GROUPS,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
+        // rigidbody
+        .insert(RigidBody::Fixed)
+        .insert(LockedAxes::ROTATION_LOCKED)
+        //.insert(RigidBodyPositionSync::Discrete)
+        // collider
+        .insert(Collider::cuboid(2.5, 0.5))
+        //.insert(ColliderMaterial::new(0.0, 0.0))
+        .insert(CollisionGroups::new(WORLD_LAYER, CHARACTER_LAYER))
         .insert(Name::new("Platform"));
 
     commands
@@ -177,29 +143,17 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(5.0, 1.0)),
                 ..Default::default()
             },
+            transform: Transform::from_translation(Vec3::new(10.0, -5.0, 0.0)),
             ..Default::default()
         })
-        .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static.into(),
-            position: Vec2::new(10.0, -5.0).into(),
-            mass_properties: RigidBodyMassProps {
-                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        .insert(RigidBodyPositionSync::Discrete)
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(2.5, 0.5).into(),
-            material: ColliderMaterial::new(0.0, 0.0).into(),
-            flags: ColliderFlags {
-                collision_groups: *WORLD_COLLISION_GROUPS,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
+        // rigidbody
+        .insert(RigidBody::Fixed)
+        .insert(LockedAxes::ROTATION_LOCKED)
+        //.insert(RigidBodyPositionSync::Discrete)
+        // collider
+        .insert(Collider::cuboid(2.5, 0.5))
+        //.insert(ColliderMaterial::new(0.0, 0.0))
+        .insert(CollisionGroups::new(WORLD_LAYER, CHARACTER_LAYER))
         .insert(Name::new("Platform"));
 
     // player
@@ -210,42 +164,36 @@ pub fn setup_world(mut commands: Commands) {
                 custom_size: Some(Vec2::new(1.0, 2.0)),
                 ..Default::default()
             },
+            transform: Transform::from_translation(Vec3::new(
+                world_bounds.min.x + 1.0,
+                world_bounds.min.y + 10.0,
+                0.0,
+            )),
             ..Default::default()
         })
-        .insert_bundle(RigidBodyBundle {
-            //body_type: RigidBodyType::KinematicPositionBased.into(),
-            body_type: RigidBodyType::Dynamic.into(),
-            position: Vec2::new(world_bounds.min.x + 1.0, world_bounds.min.y + 10.0).into(),
-            mass_properties: RigidBodyMassProps {
-                flags: RigidBodyMassPropsFlags::ROTATION_LOCKED,
-                local_mprops: MassProperties {
-                    inv_mass: 1.0 / CHARACTER_MASS,
-                    inv_principal_inertia_sqrt: 0.0,
-                    local_com: Point::origin(),
-                },
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
+        // rigidbody
+        .insert(RigidBody::Dynamic)
+        .insert(LockedAxes::ROTATION_LOCKED)
+        .insert(MassProperties {
+            local_center_of_mass: Vec2::ZERO,
+            mass: CHARACTER_MASS,
+            principal_inertia: 0.0,
         })
-        .insert(RigidBodyPositionSync::Discrete)
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(0.5, 1.0).into(),
-            material: ColliderMaterial::new(0.0, 0.0).into(),
-            flags: ColliderFlags {
-                collision_groups: *CHARACTER_COLLISION_GROUPS,
-                ..Default::default()
-            }
-            .into(),
-            ..Default::default()
-        })
-        //.insert(ColliderDebugRender::with_id(1))
+        .insert(Velocity::default())
+        //.insert(RigidBodyPositionSync::Discrete)
+        // collider
+        .insert(Collider::cuboid(0.5, 1.0))
+        //.insert(ColliderMaterial::new(0.0, 0.0))
+        .insert(CollisionGroups::new(CHARACTER_LAYER, WORLD_LAYER))
         .insert(Character {
             speed: 10.0,
             air_control_factor: 1.0,
             jump_force: Vec2::Y * CHARACTER_JUMP_FORCE,
             ..Default::default()
         })
+        // forces
+        .insert(ExternalForce::default())
+        .insert(ExternalImpulse::default())
         .insert(PlayerCharacter::default())
         .insert(Name::new("Player"));
 }

@@ -7,13 +7,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.6"
-bevy_egui = "0.11"
-bevy-inspector-egui = "0.8"
-# TODO: bevy-inspector-egui-rapier
-bevy_prototype_lyon = "0.4"
-bevy_rapier2d = { version = "0.12", features = [ "simd-stable", "parallel", "serde-serialize", "render" ] }
-once_cell = "1.9"
+bevy = "0.7"
+bevy_egui = "0.14"
+bevy-inspector-egui = "0.11"
+bevy-inspector-egui-rapier = { version = "0.3", features = ["rapier2d"] }
+bevy_prototype_lyon = "0.5"
+bevy_rapier2d = { version = "0.13", features = [ "simd-stable", "parallel", "serde-serialize", "debug-render" ] }
 
 [dependencies.core_lib]
 path = "../core"

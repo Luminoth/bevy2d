@@ -12,8 +12,8 @@ use crate::resources::game::*;
 use crate::resources::world::*;
 use crate::states::*;
 use crate::{
-    ASPECT_RATIO, CAMERA_SIZE, CHARACTER_GRAVITY, CHARACTER_JUMP_FORCE, CHARACTER_LAYER,
-    CHARACTER_MASS, GRAVITY, WORLD_LAYER,
+    CHARACTER_GRAVITY, CHARACTER_JUMP_ACCELERATION, CHARACTER_LAYER, CHARACTER_MASS, ORTHO_SIZE,
+    WORLD_LAYER,
 };
 
 /// Main game state
@@ -26,20 +26,19 @@ pub struct Game {
 
 /// Game setup
 pub fn setup(mut commands: Commands) {
-    info!("camera size: {}", CAMERA_SIZE);
+    info!("camera size: {}", ORTHO_SIZE);
 
     // cameras
     let mut camera = Camera2dBundle::default();
-    camera.projection.scaling_mode = ScalingMode::FixedVertical(CAMERA_SIZE * 2.0);
+    camera.projection.scaling_mode = ScalingMode::FixedVertical(ORTHO_SIZE * 2.0);
 
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
-    commands.spawn_bundle(camera);
+    commands
+        .spawn_bundle(camera)
+        .insert(Name::new("Main Camera"));
 
     // physics
-    commands.insert_resource(RapierConfiguration {
-        gravity: Vec2::Y * GRAVITY,
-        ..Default::default()
-    });
+    commands.insert_resource(RapierConfiguration::default());
 
     // game state
     commands.insert_resource(CharacterInput2D::default());
@@ -62,11 +61,15 @@ pub fn teardown(mut commands: Commands) {
 }
 
 /// Setup the game world
-pub fn setup_world(mut commands: Commands) {
+pub fn setup_world(mut commands: Commands, windows: Res<Windows>) {
+    let window = windows.get_primary().unwrap();
+    let aspect_ratio = window.width() / window.height();
+
     let world_bounds = WorldBounds2D {
-        min: Vec2::new(-ASPECT_RATIO * CAMERA_SIZE, -CAMERA_SIZE),
-        max: Vec2::new(ASPECT_RATIO * CAMERA_SIZE, CAMERA_SIZE),
+        min: Vec2::new(-aspect_ratio * ORTHO_SIZE, -ORTHO_SIZE),
+        max: Vec2::new(aspect_ratio * ORTHO_SIZE, ORTHO_SIZE),
     };
+    info!("world bounds: {:?}", world_bounds);
 
     // world
     commands.insert_resource(world_bounds);
@@ -185,7 +188,7 @@ pub fn setup_world(mut commands: Commands) {
         .insert(Character {
             speed: 10.0,
             air_control_factor: 1.0,
-            jump_force: Vec2::Y * CHARACTER_JUMP_FORCE,
+            jump_force: Vec2::Y * CHARACTER_JUMP_ACCELERATION * CHARACTER_MASS,
             ..Default::default()
         })
         // forces
@@ -224,7 +227,8 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             ),
             ..Default::default()
         })
-        .insert(TimerText);
+        .insert(TimerText)
+        .insert(Name::new("Timer"));
 }
 
 /// Tear down the game UI

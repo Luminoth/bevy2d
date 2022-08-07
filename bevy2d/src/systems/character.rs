@@ -9,6 +9,7 @@ use core_lib::resources::input::*;
 use crate::events::character::*;
 use crate::events::PauseEvent;
 use crate::resources::game::*;
+use crate::resources::world::*;
 use crate::states::game::Game;
 use crate::{CHARACTER_LAYER, WORLD_LAYER};
 
@@ -16,23 +17,29 @@ use crate::{CHARACTER_LAYER, WORLD_LAYER};
 pub fn character_movement(
     game: Res<Game>,
     input: Res<CharacterInput2D>,
-    mut query: Query<(&Character, &mut Velocity), With<PlayerCharacter>>,
+    bounds: Res<WorldBounds2D>,
+    mut query: Query<(&Character, &Sprite, &GlobalTransform, &mut Velocity), With<PlayerCharacter>>,
 ) {
     if game.paused {
         return;
     }
 
-    for (character, mut velocity) in query.iter_mut() {
-        // TODO: air control is kind of bad because we aren't factoring in momentum
+    for (character, sprite, transform, mut velocity) in query.iter_mut() {
+        let half_width = sprite.custom_size.unwrap().x / 2.0;
+        let position = transform.translation();
         let mut speed = character.speed;
-        if !character.grounded {
+
+        if (position.x - half_width < bounds.min.x && input.direction.x < 0.0)
+            || (position.x + half_width > bounds.max.x && input.direction.x > 0.0)
+        {
+            // TODO: actually what we want is to wrap around
+            speed = 0.0;
+        } else if !character.grounded {
+            // TODO: air control is kind of bad because we aren't factoring in momentum
             speed *= character.air_control_factor;
         }
 
         velocity.linvel.x = input.direction.x * speed;
-
-        // TODO: need to set things up to constrain the character
-        // or wrap it around the screen
     }
 }
 
@@ -92,17 +99,16 @@ pub fn character_pause(
 /// without having to affect the gravity effects of everything else
 pub fn character_gravity_multiplier(
     game: Res<Game>,
-    _game_config: Res<GameConfig>,
+    game_config: Res<GameConfig>,
     mut query: Query<(&Character, &mut ExternalForce)>,
 ) {
     if game.paused {
         return;
     }
 
-    for (character, mut _force) in query.iter_mut() {
+    for (character, mut force) in query.iter_mut() {
         if !character.grounded {
-            // TODO: this is waaaay too much
-            //force.force += game_config.character_gravity;
+            force.force += game_config.character_gravity;
         }
     }
 }

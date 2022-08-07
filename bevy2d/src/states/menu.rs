@@ -8,7 +8,9 @@ use super::GameState;
 pub fn setup(mut commands: Commands) {
     // cameras
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands
+        .spawn_bundle(Camera2dBundle::default())
+        .insert(Name::new("Main Camera"));
 }
 
 /// Menu teardown

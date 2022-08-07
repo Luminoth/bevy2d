@@ -32,18 +32,13 @@ use systems::{pause, pause_input};
 const WORLD_LAYER: u32 = 0b01;
 const CHARACTER_LAYER: u32 = 0b10;
 
-const GRAVITY: f32 = -9.81;
-
 const CHARACTER_MASS: f32 = 100.0;
-const CHARACTER_GRAVITY: f32 = -750.0;
-const CHARACTER_JUMP_FORCE: f32 = 1500.0;
+const CHARACTER_GRAVITY: f32 = -0.0;
+const CHARACTER_JUMP_ACCELERATION: f32 = 40.0;
 
 const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
-const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
-
-const PIXELS_PER_UNIT: f32 = 32.0;
-const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
+const ORTHO_SIZE: f32 = 10.0;
 
 fn setup(asset_server: Res<AssetServer>) {
     #[cfg(debug_assertions)]
@@ -73,7 +68,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(ShapePlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
-            CAMERA_SIZE * 100.0,
+            WINDOW_HEIGHT / (ORTHO_SIZE * 2.0),
         ))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(InspectableRapierPlugin)

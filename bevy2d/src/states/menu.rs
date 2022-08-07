@@ -1,26 +1,14 @@
 //! Menu state systems
 
 use bevy::prelude::*;
-//use bevy::render::camera::*;
-
-use core_lib::components::camera::*;
-
-use crate::CAMERA_SIZE;
 
 use super::GameState;
 
 /// Menu setup
 pub fn setup(mut commands: Commands) {
-    info!("camera size: {}", CAMERA_SIZE);
-
     // cameras
-    let camera = CameraOrtho2dBundle::new(CAMERA_SIZE);
-    /*let mut camera = OrthographicCameraBundle::new_2d();
-    camera.orthographic_projection.scale = CAMERA_SIZE;
-    camera.orthographic_projection.scaling_mode = ScalingMode::FixedHorizontal;*/
-
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
-    commands.spawn_bundle(camera);
+    commands.spawn_bundle(Camera2dBundle::default());
 }
 
 /// Menu teardown
@@ -45,7 +33,7 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .spawn_bundle(ButtonBundle {
                     style: Style {
                         size: Size::new(Val::Px(150.0), Val::Px(65.0)),
-                        margin: Rect::all(Val::Auto),
+                        margin: UiRect::all(Val::Auto),
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
                         ..Default::default()
@@ -55,21 +43,18 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 })
                 .with_children(|parent| {
                     parent.spawn_bundle(TextBundle {
-                        text: Text::with_section(
+                        text: Text::from_section(
                             "Play",
                             TextStyle {
                                 font: asset_server.load("fonts/Roboto-Regular.ttf"),
                                 font_size: 40.0,
                                 color: Color::rgb(0.9, 0.9, 0.9),
                             },
-                            Default::default(),
                         ),
                         ..Default::default()
                     });
                 });
         });
-
-    commands.spawn_bundle(UiCameraBundle::default());
 }
 
 /// Tear down the menu UI

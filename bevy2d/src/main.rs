@@ -15,7 +15,6 @@ use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use core_lib::components::camera::*;
 use core_lib::components::character::*;
 use core_lib::events::debug::*;
 use core_lib::resources::debug::*;
@@ -43,7 +42,6 @@ const WINDOW_WIDTH: f32 = 1280.0;
 const WINDOW_HEIGHT: f32 = 720.0;
 const ASPECT_RATIO: f32 = WINDOW_WIDTH / WINDOW_HEIGHT;
 
-// https://indiehoodgames.wordpress.com/2013/07/27/pixel-perfect-calculator-for-orthographic-camera-unity3d/
 const PIXELS_PER_UNIT: f32 = 32.0;
 const CAMERA_SIZE: f32 = WINDOW_HEIGHT / (2.0 * PIXELS_PER_UNIT);
 
@@ -93,7 +91,6 @@ fn main() {
             ..Default::default()
         })
         .add_plugin(WorldInspectorPlugin::new())
-        .register_inspectable::<OrthoProjection>()
         .register_inspectable::<TimerText>()
         .register_inspectable::<Character>()
         .register_inspectable::<PlayerCharacter>()
@@ -167,11 +164,6 @@ fn main() {
         // setup
         .add_startup_system(setup)
         .add_startup_system(setup_debug)
-        // add internal camera system update
-        .add_system_to_stage(
-            bevy::app::CoreStage::PostUpdate,
-            bevy::render::camera::camera_system::<OrthoProjection>,
-        )
         // debug
         .add_system(debug_system)
         .add_system(debug_ui)

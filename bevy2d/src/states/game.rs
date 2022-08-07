@@ -1,10 +1,9 @@
 //! Game state systems
 
 use bevy::prelude::*;
-//use bevy::render::camera::*;
+use bevy::render::camera::*;
 use bevy_rapier2d::prelude::*;
 
-use core_lib::components::camera::*;
 use core_lib::components::character::*;
 use core_lib::resources::input::*;
 
@@ -30,10 +29,8 @@ pub fn setup(mut commands: Commands) {
     info!("camera size: {}", CAMERA_SIZE);
 
     // cameras
-    let camera = CameraOrtho2dBundle::new(CAMERA_SIZE);
-    /*let mut camera = OrthographicCameraBundle::new_2d();
-    camera.orthographic_projection.scale = CAMERA_SIZE;
-    camera.orthographic_projection.scaling_mode = ScalingMode::FixedHorizontal;*/
+    let mut camera = Camera2dBundle::default();
+    camera.projection.scaling_mode = ScalingMode::FixedHorizontal(CAMERA_SIZE * 3.75);
 
     commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)));
     commands.spawn_bundle(camera);
@@ -174,11 +171,11 @@ pub fn setup_world(mut commands: Commands) {
         // rigidbody
         .insert(RigidBody::Dynamic)
         .insert(LockedAxes::ROTATION_LOCKED)
-        .insert(MassProperties {
+        .insert(AdditionalMassProperties::MassProperties(MassProperties {
             local_center_of_mass: Vec2::ZERO,
             mass: CHARACTER_MASS,
             principal_inertia: 0.0,
-        })
+        }))
         .insert(Velocity::default())
         //.insert(RigidBodyPositionSync::Discrete)
         // collider
@@ -210,27 +207,24 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
-                position: Rect {
+                position: UiRect {
                     top: Val::Px(5.0),
                     right: Val::Px(15.0),
                     ..Default::default()
                 },
                 ..Default::default()
             },
-            text: Text::with_section(
+            text: Text::from_section(
                 "0",
                 TextStyle {
                     font: asset_server.load("fonts/Roboto-Regular.ttf"),
                     font_size: 30.0,
                     color: Color::WHITE,
                 },
-                TextAlignment::default(),
             ),
             ..Default::default()
         })
         .insert(TimerText);
-
-    commands.spawn_bundle(UiCameraBundle::default());
 }
 
 /// Tear down the game UI

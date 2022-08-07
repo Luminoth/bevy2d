@@ -122,8 +122,7 @@ pub fn character_grounded_system(
             Vec2::Y * -1.0,
             0.1,
             true,
-            InteractionGroups::new(CHARACTER_LAYER, WORLD_LAYER),
-            None,
+            QueryFilter::new().groups(InteractionGroups::new(CHARACTER_LAYER, WORLD_LAYER)),
         ) {
             if !character.grounded {
                 debug!("grounded");

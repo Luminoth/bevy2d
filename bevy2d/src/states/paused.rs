@@ -1,22 +1,14 @@
-//! Game over sub-state systems
+//! Game paused sub-state systems
 
 use bevy::prelude::*;
 
-use crate::states::*;
+/// Paused setup
+pub fn setup(mut _commands: Commands) {}
 
-pub struct GameOverTimer(Timer);
+/// Paused tear down
+pub fn teardown(mut _commands: Commands) {}
 
-/// Game over setup
-pub fn setup(mut commands: Commands) {
-    commands.insert_resource(GameOverTimer(Timer::from_seconds(10.0, false)));
-}
-
-/// Game over tear down
-pub fn teardown(mut commands: Commands) {
-    commands.remove_resource::<GameOverTimer>();
-}
-
-/// Setup the game over UI
+/// Setup the paused UI
 pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     // TODO: this should be centered
     commands.spawn_bundle(TextBundle {
@@ -31,7 +23,7 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         },
         text: Text::from_section(
-            "Game Over",
+            "Paused",
             TextStyle {
                 font: asset_server.load("fonts/Roboto-Regular.ttf"),
                 font_size: 30.0,
@@ -42,16 +34,5 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-/// Tear down the game over UI
+/// Tear down the game UI
 pub fn teardown_ui(mut _commands: Commands) {}
-
-/// Game over state update
-pub fn on_update(
-    time: Res<Time>,
-    mut timer: ResMut<GameOverTimer>,
-    mut state: ResMut<State<GameState>>,
-) {
-    if timer.0.tick(time.delta()).just_finished() {
-        state.set(GameState::Menu).unwrap();
-    }
-}

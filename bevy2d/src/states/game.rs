@@ -20,8 +20,6 @@ use crate::{
 #[derive(Default)]
 pub struct Game {
     timer: Timer,
-
-    pub paused: bool,
 }
 
 /// Game setup
@@ -47,7 +45,6 @@ pub fn setup(mut commands: Commands) {
     });
     commands.insert_resource(Game {
         timer: Timer::from_seconds(30.0, false),
-        ..Default::default()
     });
 }
 
@@ -236,10 +233,6 @@ pub fn teardown_ui(mut _commands: Commands) {}
 
 /// Main game update
 pub fn on_update(time: Res<Time>, mut game: ResMut<Game>, mut state: ResMut<State<GameState>>) {
-    if game.paused {
-        return;
-    }
-
     if game.timer.tick(time.delta()).just_finished() {
         state.push(GameState::GameOver).unwrap();
     }

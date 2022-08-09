@@ -22,11 +22,11 @@ use core_lib::systems::input::*;
 
 use components::game::*;
 use events::character::*;
-use events::PauseEvent;
+use events::*;
 use states::*;
 use systems::character::*;
 use systems::debug::*;
-use systems::{pause, pause_input};
+use systems::*;
 
 // physics layers
 const WORLD_LAYER: u32 = 0b01;
@@ -131,8 +131,7 @@ fn main() {
                 .with_system(character_jump.after(systems::Systems::CharacterJumpInput))
                 // physics
                 .with_system(character_grounded_system)
-                .with_system(character_gravity_multiplier)
-                .with_system(character_pause.after(systems::Systems::Pause)),
+                .with_system(character_gravity_multiplier),
         )
         .add_system_set(
             SystemSet::on_exit(GameState::Game)
@@ -140,6 +139,25 @@ fn main() {
                 .with_system(states::game::teardown_world)
                 .with_system(states::game::teardown)
                 .with_system(core_lib::states::teardown),
+        )
+        .add_system_set(
+            SystemSet::on_enter(GameState::Paused)
+                .with_system(states::paused::setup)
+                .with_system(states::paused::setup_ui),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::Paused)
+                .with_system(pause_input.label(systems::Systems::UnPauseInput))
+                .with_system(
+                    unpause
+                        .label(systems::Systems::UnPause)
+                        .after(systems::Systems::UnPauseInput),
+                ),
+        )
+        .add_system_set(
+            SystemSet::on_exit(GameState::Paused)
+                .with_system(states::paused::teardown_ui)
+                .with_system(states::paused::teardown),
         )
         .add_system_set(
             SystemSet::on_enter(GameState::GameOver)
